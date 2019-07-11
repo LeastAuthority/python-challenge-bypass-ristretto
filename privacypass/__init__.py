@@ -51,7 +51,8 @@ class BlindedToken(object):
             raise TokenException("encoding token to base64 bytes failed")
         return encoded
 
-    def unmarshal_text(self, text):
+    @staticmethod
+    def unmarshal_text(text):
         decoded = lib.blinded_token_decode_base64(text)
         if decoded == ffi.NULL:
             raise TokenException("failed to decode blinded token")

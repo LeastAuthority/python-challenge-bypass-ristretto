@@ -1,19 +1,23 @@
 import privacypass as p
 
 def run():
+    # server setup
     skey = p.random_signing_key()
     pk = p.PublicKey(skey)
 
+    ## signing
+    # client prepares a random token and blinding scalar
     token = p.RandomToken()
+
+    # client blinds the token and sends it to the server
     blinded_token = token.blind()
 
-    # todo: json encode a request structure
-
     encoded = blinded_token.marshal_text()
-    server_blinded_token = p.BlindedToken(b"")
-    server_blinded_token.unmarshal_text(encoded)
+    server_blinded_token = p.BlindedToken.unmarshal_text(encoded)
 
     # server signs blinded token
+    signed_token = skey.sign(server_blinded_token)
+
     # server creates a batch DLEQ proof and returns it and the signed token to the client
     # client verifies the DLEQ proof and unblinds the token
 
