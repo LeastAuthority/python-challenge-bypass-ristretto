@@ -25,6 +25,19 @@ class SigningKey(object):
     def __init__(self, v):
         self._raw = v
 
+    def sign(self, blinded_token):
+        assert(isinstance(blinded_token, BlindedToken))
+
+        signed_token = lib.signing_key_sign(self._raw, blinded_token._raw)
+        if signed_token == ffi.NULL:
+            raise KeyException("failed to sign token")
+        return SignedToken(signed_token)
+
+class SignedToken(object):
+    def __init__(self, v):
+        self._raw = v
+
+
 class BlindedToken(object):
     def __init__(self, v):
         self._raw = v
