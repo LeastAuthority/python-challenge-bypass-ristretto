@@ -13,8 +13,11 @@ pythonPackages.buildPythonPackage rec {
       --replace "./src" "${src}/challenge-bypass-ristretto-ffi/src"
   '';
 
-  propagatedNativeBuildInputs = [
+  nativeBuildInputs = [
     git
+  ];
+
+  propagatedNativeBuildInputs = [
     ristretto
   ];
 
