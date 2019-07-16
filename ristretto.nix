@@ -1,7 +1,7 @@
 { fetchFromGitHub, rustPlatform }:
 rustPlatform.buildRustPackage rec {
   name = "ristretto-${version}";
-  version = "1.0.0-pre.1";
+  version = "1.0.0-pre.0";
   src = fetchFromGitHub {
     owner = "brave-intl";
     repo = "challenge-bypass-ristretto-ffi";
