@@ -1,6 +1,8 @@
 { pkgs ? import <nixpkgs> { } }:
 let
+pythonPackages = pkgs.python27Packages;
+python = pkgs.python27;
 ristretto = pkgs.callPackage ./ristretto.nix { };
-privacypass = pkgs.python27Packages.callPackage ./privacypass.nix { inherit ristretto; };
+privacypass = pythonPackages.callPackage ./privacypass.nix { inherit ristretto; };
 in
-(pkgs.python27.withPackages (ps: [ privacypass ])).env
+(python.withPackages (ps: [ privacypass ])).env
