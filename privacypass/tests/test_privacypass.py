@@ -3,6 +3,7 @@ from testtools import (
 )
 from testtools.matchers import (
     Mismatch,
+    raises,
 )
 from testtools.content import (
     text_content,
@@ -16,7 +17,10 @@ from hypothesis.strategies import (
 )
 
 from .. import (
+    DecodeException,
     RandomToken,
+    BlindedToken,
+    SignedToken,
     BatchDLEQProof,
     random_signing_key,
 )
@@ -87,9 +91,9 @@ class RoundTripsThroughBase64(object):
                 "failed to round-trip unmodified",
                 dict(
                     o=text_content("{}".format(o)),
-                    serialized=text_content(serialized),
+                    serialized=text_content("{!r}".format(serialized)),
                     deserialized=text_content("{}".format(deserialized)),
-                    reserialized=text_content(reserialized),
+                    reserialized=text_content("{!r}".format(reserialized)),
                 ),
             )
         return None
@@ -103,6 +107,11 @@ class BlindedTokenTests(TestCase):
     def test_serialization_roundtrip(self, blinded_token):
         self.assertThat(blinded_token, RoundTripsThroughBase64())
 
+    def test_deserialization_error(self):
+        self.assertThat(
+            lambda: BlindedToken.decode_base64(b"not valid base64"),
+            raises(DecodeException),
+        )
 
 class SignedTokenTests(TestCase):
     """
@@ -111,6 +120,12 @@ class SignedTokenTests(TestCase):
     @given(signed_tokens())
     def test_serialization_roundtrip(self, signed_token):
         self.assertThat(signed_token, RoundTripsThroughBase64())
+
+    def test_deserialization_error(self):
+        self.assertThat(
+            lambda: SignedToken.decode_base64(b"not valid base64"),
+            raises(DecodeException),
+        )
 
 
 class BatchDLEQProofTests(TestCase):
@@ -125,3 +140,9 @@ class BatchDLEQProofTests(TestCase):
         )
         self.addCleanup(proof.destroy)
         self.assertThat(proof, RoundTripsThroughBase64())
+
+    def test_deserialization_error(self):
+        self.assertThat(
+            lambda: BatchDLEQProof.decode_base64(b"not valid base64"),
+            raises(DecodeException),
+        )

@@ -4,16 +4,13 @@ def to_string(v):
     return ffi.string(v)
 
 class KeyException(Exception):
-    def __init__(self):
-        pass
-    def __str__(self):
-        pass
+    pass
 
 class TokenException(Exception):
-    def __init__(self):
-        pass
-    def __str__(self):
-        pass
+    pass
+
+class DecodeException(Exception):
+    pass
 
 def random_signing_key():
     k = lib.signing_key_random()
@@ -46,7 +43,11 @@ class SignedToken(object):
 
     @classmethod
     def decode_base64(cls, text):
-        return cls(lib.signed_token_decode_base64(text))
+        decoded = lib.signed_token_decode_base64(text)
+        if decoded == ffi.NULL:
+            raise DecodeException()
+        return cls(decoded)
+
 
 class BlindedToken(object):
     def __init__(self, v):
@@ -65,7 +66,7 @@ class BlindedToken(object):
     def decode_base64(cls, text):
         decoded = lib.blinded_token_decode_base64(text)
         if decoded == ffi.NULL:
-            raise TokenException("failed to decode blinded token")
+            raise DecodeException("failed to decode blinded token")
         return cls(decoded)
 
 class UnblindedToken(object):
@@ -87,7 +88,10 @@ class TokenPreimage(object):
 
     @classmethod
     def decode_base64(cls, text):
-        return cls(lib.token_preimage_decode_base64(text))
+        decoded = lib.token_preimage_decode_base64(text)
+        if decoded == ffi.NULL:
+            raise DecodeException()
+        return cls(decoded)
 
 
 class VerificationKey(object):
@@ -166,7 +170,10 @@ class BatchDLEQProof(object):
 
     @classmethod
     def decode_base64(cls, text):
-        return cls(lib.batch_dleq_proof_decode_base64(text))
+        raw = lib.batch_dleq_proof_decode_base64(text)
+        if raw == ffi.NULL:
+            raise DecodeException("failed to decode the object")
+        return cls(raw)
 
     def destroy(self):
         lib.batch_dleq_proof_destroy(self._raw)
