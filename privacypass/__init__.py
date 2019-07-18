@@ -44,9 +44,9 @@ class SignedToken(object):
     def encode_base64(self):
         return lib.signed_token_encode_base64(self._raw)
 
-    @staticmethod
-    def decode_base64(text):
-        return SignedToken(lib.signed_token_decode_base64(text))
+    @classmethod
+    def decode_base64(cls, text):
+        return cls(lib.signed_token_decode_base64(text))
 
 class BlindedToken(object):
     def __init__(self, v):
@@ -61,12 +61,12 @@ class BlindedToken(object):
             raise TokenException("encoding token to base64 bytes failed")
         return encoded
 
-    @staticmethod
-    def decode_base64(text):
+    @classmethod
+    def decode_base64(cls, text):
         decoded = lib.blinded_token_decode_base64(text)
         if decoded == ffi.NULL:
             raise TokenException("failed to decode blinded token")
-        return BlindedToken(decoded)
+        return cls(decoded)
 
 class UnblindedToken(object):
     def __init__(self, v):
@@ -85,9 +85,9 @@ class TokenPreimage(object):
     def encode_base64(self):
         return lib.token_preimage_encode_base64(self._raw)
 
-    @staticmethod
-    def decode_base64(text):
-        return TokenPreimage(lib.token_preimage_decode_base64(text))
+    @classmethod
+    def decode_base64(cls, text):
+        return cls(lib.token_preimage_decode_base64(text))
 
 
 class VerificationKey(object):
@@ -112,9 +112,9 @@ class VerificationSignature(object):
     def encode_base64(self):
         return lib.verification_signature_encode_base64(self._raw)
 
-    @staticmethod
-    def decode_base64(text):
-        return VerificationSignature(lib.verification_signature_decode_base64(text))
+    @classmethod
+    def decode_base64(cls, text):
+        return cls(lib.verification_signature_decode_base64(text))
 
 class RandomToken(object):
     def __init__(self):
@@ -164,9 +164,9 @@ class BatchDLEQProof(object):
     def encode_base64(self):
         return lib.batch_dleq_proof_encode_base64(self._raw)
 
-    @staticmethod
-    def decode_base64(text):
-        return BatchDLEQProof(lib.batch_dleq_proof_decode_base64(text))
+    @classmethod
+    def decode_base64(cls, text):
+        return cls(lib.batch_dleq_proof_decode_base64(text))
 
     def destroy(self):
         lib.batch_dleq_proof_destroy(self._raw)
