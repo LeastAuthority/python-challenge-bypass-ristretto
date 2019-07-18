@@ -123,4 +123,5 @@ class BatchDLEQProofTests(TestCase):
         proof = BatchDLEQProof.create(
             signing_key, blinded_tokens, signed_tokens,
         )
+        self.addCleanup(proof.destroy)
         self.assertThat(proof, RoundTripsThroughBase64())
