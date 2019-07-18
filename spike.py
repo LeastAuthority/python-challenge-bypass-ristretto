@@ -27,7 +27,7 @@ def main():
     )
     debug("marshaling blinded tokens")
     marshaled_blinded_tokens = list(
-        blinded_token.marshal_text()
+        blinded_token.encode_base64()
         for blinded_token
         in clients_blinded_tokens
     )
@@ -39,7 +39,7 @@ def main():
     servers_public_key = PublicKey(servers_signing_key)
     debug("unmarshaling blinded tokens")
     servers_blinded_tokens = list(
-        BlindedToken.unmarshal_text(marshaled_blinded_token)
+        BlindedToken.decode_base64(marshaled_blinded_token)
         for marshaled_blinded_token
         in marshaled_blinded_tokens
     )
