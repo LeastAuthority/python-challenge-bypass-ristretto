@@ -21,6 +21,7 @@ from .. import (
     RandomToken,
     BlindedToken,
     SignedToken,
+    PublicKey,
     BatchDLEQProof,
     random_signing_key,
 )
@@ -155,3 +156,27 @@ class BatchDLEQProofTests(TestCase):
             lambda: BatchDLEQProof.decode_base64(b"not valid base64"),
             raises(DecodeException),
         )
+
+
+class TokenPreimageTests(TestCase):
+    """
+    Tests r elated to ``TokenPreimage``.
+    """
+    @given(random_tokens(), signing_keys())
+    def test_serialization_roundtrip(self, token, signing_key):
+        public_key = PublicKey(signing_key)
+        blinded_token = token.blind()
+        signed_token = signing_key.sign(blinded_token)
+        proof = BatchDLEQProof.create(
+            signing_key,
+            [blinded_token],
+            [signed_token],
+        )
+        [unblinded_token] = proof.invalid_or_unblind(
+            [token],
+            [blinded_token],
+            [signed_token],
+            public_key,
+        )
+        preimage = unblinded_token.preimage()
+        self.assertThat(preimage, RoundTripsThroughBase64())
