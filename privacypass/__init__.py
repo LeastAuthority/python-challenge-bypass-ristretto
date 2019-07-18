@@ -18,7 +18,7 @@ class TokenException(Exception):
 def random_signing_key():
     k = lib.signing_key_random()
     if k == ffi.NULL:
-        raise KeyException
+        raise KeyException()
     return SigningKey(k)
 
 class SigningKey(object):
