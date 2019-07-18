@@ -99,6 +99,15 @@ class RoundTripsThroughBase64(object):
         return None
 
 
+class SigningKeyTests(TestCase):
+    """
+    Tests related to ``SigningKey``.
+    """
+    @given(signing_keys())
+    def test_serialization_roundtrip(self, signing_key):
+        self.assertThat(signing_key, RoundTripsThroughBase64())
+
+
 class BlindedTokenTests(TestCase):
     """
     Tests related to ``BlindedToken``.

@@ -33,6 +33,16 @@ class SigningKey(object):
     def rederive_unblinded_token(self, token_preimage):
         return UnblindedToken(lib.signing_key_rederive_unblinded_token(self._raw, token_preimage._raw))
 
+    def encode_base64(self):
+        return to_string(lib.signing_key_encode_base64(self._raw))
+
+    @classmethod
+    def decode_base64(cls, text):
+        decoded = lib.signing_key_decode_base64(text)
+        if decoded == ffi.NULL:
+            raise DecodeException()
+        return cls(decoded)
+
 
 class SignedToken(object):
     def __init__(self, v):
