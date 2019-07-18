@@ -42,7 +42,7 @@ class SignedToken(object):
         self._raw = v
 
     def encode_base64(self):
-        return lib.signed_token_encode_base64(self._raw)
+        return to_string(lib.signed_token_encode_base64(self._raw))
 
     @classmethod
     def decode_base64(cls, text):
@@ -59,7 +59,7 @@ class BlindedToken(object):
         encoded = lib.blinded_token_encode_base64(self._raw)
         if encoded == ffi.NULL:
             raise TokenException("encoding token to base64 bytes failed")
-        return encoded
+        return to_string(encoded)
 
     @classmethod
     def decode_base64(cls, text):
@@ -83,7 +83,7 @@ class TokenPreimage(object):
         self._raw = v
 
     def encode_base64(self):
-        return lib.token_preimage_encode_base64(self._raw)
+        return to_string(lib.token_preimage_encode_base64(self._raw))
 
     @classmethod
     def decode_base64(cls, text):
@@ -110,7 +110,7 @@ class VerificationSignature(object):
         self._raw = v
 
     def encode_base64(self):
-        return lib.verification_signature_encode_base64(self._raw)
+        return to_string(lib.verification_signature_encode_base64(self._raw))
 
     @classmethod
     def decode_base64(cls, text):
@@ -162,7 +162,7 @@ class BatchDLEQProof(object):
         self._raw = proof
 
     def encode_base64(self):
-        return lib.batch_dleq_proof_encode_base64(self._raw)
+        return to_string(lib.batch_dleq_proof_encode_base64(self._raw))
 
     @classmethod
     def decode_base64(cls, text):

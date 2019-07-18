@@ -23,6 +23,12 @@ setup(
     platforms='any',
     setup_requires=['milksnake', 'setuptools_scm'],
     install_requires=['milksnake'],
+    extras_require={
+        "tests": [
+            "testtools",
+            "hypothesis",
+        ],
+    },
     use_scm_version=True,
     url='https://github.com/',
     milksnake_tasks=[
