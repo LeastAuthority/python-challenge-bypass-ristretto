@@ -6,8 +6,10 @@ from privacypass import (
     RandomToken,
     PublicKey,
     BlindedToken,
-    lib,
-    ffi,
+    BatchDLEQProof,
+    SignedToken,
+    TokenPreimage,
+    VerificationSignature,
 )
 
 def debug(*a, **kw):
@@ -49,63 +51,56 @@ def main():
     )
     debug("encoded signed tokens")
     marshaled_signed_tokens = list(
-        lib.signed_token_encode_base64(signed_token._raw)
+        signed_token.encode_base64()
         for signed_token
         in servers_signed_tokens
     )
     debug("generating batch dleq proof")
-    servers_proof = lib.batch_dleq_proof_new(
-        list(t._raw for t in servers_blinded_tokens),
-        list(t._raw for t in servers_signed_tokens),
-        len(servers_blinded_tokens),
-        servers_signing_key._raw,
+    servers_proof = BatchDLEQProof.create(
+        servers_signing_key,
+        servers_blinded_tokens,
+        servers_signed_tokens,
     )
     try:
         debug("marshaling batch dleq proof")
-        marshaled_proof = lib.batch_dleq_proof_encode_base64(servers_proof)
+        marshaled_proof = servers_proof.encode_base64()
     finally:
         debug("releasing batch dleq proof")
-        lib.batch_dleq_proof_destroy(servers_proof)
+        servers_proof.destroy()
 
     # Client
-    debug("allocating unblinded token handle")
-    clients_unblinded_tokens = ffi.new("struct C_UnblindedToken*[]", len(clients_tokens))
     debug("decoding signed tokens")
     clients_signed_tokens = list(
-        lib.signed_token_decode_base64(marshaled_signed_token)
+        SignedToken.decode_base64(marshaled_signed_token)
         for marshaled_signed_token
         in marshaled_signed_tokens
     )
     debug("decoding batch dleq proof")
-    clients_proof = lib.batch_dleq_proof_decode_base64(marshaled_proof)
+    clients_proof = BatchDLEQProof.decode_base64(marshaled_proof)
     debug("validating batch dleq proof and unblinding tokens")
-    invalid_or_unblind = lib.batch_dleq_proof_invalid_or_unblind(
-        clients_proof,
-        list(t._raw for t in clients_tokens),
-        list(t._raw for t in clients_blinded_tokens),
+    clients_unblinded_tokens = clients_proof.invalid_or_unblind(
+        clients_tokens,
+        clients_blinded_tokens,
         clients_signed_tokens,
-        # An out parameter.  Right in the middle.  Yup.
-        clients_unblinded_tokens,
-        len(clients_tokens),
         # NOTE: Client must obtain the server's public key in some manner it
         # considers reliable.  If server can give a different public key to
         # each client then it can completely defeat PrivacyPass privacy
         # properties.
-        servers_public_key._raw,
+        servers_public_key,
     )
-    if invalid_or_unblind != 0:
-        debug("raising for proof validation failure")
-        raise Exception("invalid batch proof ({})".format(invalid_or_unblind))
-
     debug("getting token preimages")
     clients_preimages = list(
-        lib.unblinded_token_preimage(clients_unblinded_tokens[n])
-        for n
-        in range(len(clients_tokens))
+        token.preimage()
+        for token
+        in clients_unblinded_tokens
     )
 
     debug("deriving verification keys")
-    clients_verification_keys = map(lib.unblinded_token_derive_verification_key_sha512, clients_unblinded_tokens)
+    clients_verification_keys = list(
+        token.derive_verification_key_sha512()
+        for token
+        in clients_unblinded_tokens
+    )
 
     # From the protocol, "R".  From the PrivacyPass explanation, "request binding data".
     message = b"allocate_buckets {storage_index}".format(storage_index=b"ABCDEFGH")
@@ -114,7 +109,7 @@ def main():
     debug("signing message with keys")
     clients_passes = zip(
         clients_preimages, (
-            lib.verification_key_sign_sha512(verification_key, message)
+            verification_key.sign_sha512(message)
             for verification_key
             in clients_verification_keys
         ),
@@ -122,8 +117,8 @@ def main():
     debug("encoding passes")
     marshaled_passes = list(
         (
-            lib.token_preimage_encode_base64(token_preimage),
-            lib.verification_signature_encode_base64(sig),
+            token_preimage.encode_base64(),
+            sig.encode_base64()
         )
         for (token_preimage, sig)
         in clients_passes
@@ -133,15 +128,15 @@ def main():
     debug("decoding passes")
     servers_passes = list(
         (
-            lib.token_preimage_decode_base64(token_preimage),
-            lib.verification_signature_decode_base64(sig),
+            TokenPreimage.decode_base64(token_preimage),
+            VerificationSignature.decode_base64(sig),
         )
         for (token_preimage, sig)
         in marshaled_passes
     )
     debug("re-deriving unblinded tokens")
     servers_unblinded_tokens = list(
-        lib.signing_key_rederive_unblinded_token(servers_signing_key._raw, token_preimage)
+        servers_signing_key.rederive_unblinded_token(token_preimage)
         for (token_preimage, sig)
         in servers_passes
     )
@@ -152,12 +147,15 @@ def main():
     )
 
     debug("deriving verification keys")
-    servers_verification_keys = map(lib.unblinded_token_derive_verification_key_sha512, servers_unblinded_tokens)
+    servers_verification_keys = list(
+        unblinded_token.derive_verification_key_sha512()
+        for unblinded_token
+        in servers_unblinded_tokens
+    )
 
     debug("validating verification signatures")
     invalid_passes = list(
-        lib.verification_key_invalid_sha512(
-            key,
+        key.invalid_sha512(
             sig,
             # NOTE: The client and server must agree on a message somehow.
             # One approach is to derive the message from RPC parameters
