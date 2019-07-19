@@ -2,6 +2,17 @@ from __future__ import (
     print_function,
 )
 
+from contextlib import (
+    contextmanager,
+)
+from time import (
+    time,
+)
+from sys import (
+    argv,
+    stderr,
+)
+
 import attr
 
 from privacypass import (
@@ -16,7 +27,7 @@ from privacypass import (
 )
 
 def debug(*a, **kw):
-    print(*a, **kw)
+    print(*a, file=stderr, **kw)
 
 
 @attr.s
@@ -25,7 +36,7 @@ class Client(object):
 
     def request(self, count):
         debug("generating tokens")
-        clients_tokens = list(RandomToken.create() for _ in range(100))
+        clients_tokens = list(RandomToken.create() for _ in range(count))
         debug("blinding tokens")
         clients_blinded_tokens = list(
             token.blind()
@@ -186,7 +197,14 @@ class Server(object):
 
         return "Issued, redeemed, and verified {} tokens.".format(len(servers_passes))
 
-def main():
+@contextmanager
+def timing(label, count):
+    before = time()
+    yield
+    after = time()
+    print("{},{},{:0.2f}".format(label, count, (after - before) * 1000))
+
+def main(count=b"100"):
     # From the protocol, "R".  From the PrivacyPass explanation, "request binding data".
     message = b"allocate_buckets {storage_index}".format(storage_index=b"ABCDEFGH")
 
@@ -198,11 +216,16 @@ def main():
     # client then it can completely defeat PrivacyPass privacy properties.
     client = Client(PublicKey.from_signing_key(server.signing_key))
 
-    request, marshaled_blinded_tokens = client.request(100)
-    marshaled_signed_tokens, marshaled_proof = server.issue(marshaled_blinded_tokens)
-    marshaled_passes = request.redeem(message, marshaled_signed_tokens, marshaled_proof)
-    result = server.verify(message, marshaled_passes)
+    print("label,count,milliseconds")
+    with timing("request", count):
+        request, marshaled_blinded_tokens = client.request(int(count))
+    with timing("issue", count):
+        marshaled_signed_tokens, marshaled_proof = server.issue(marshaled_blinded_tokens)
+    with timing("redeem", count):
+        marshaled_passes = request.redeem(message, marshaled_signed_tokens, marshaled_proof)
+    with timing("verify", count):
+        result = server.verify(message, marshaled_passes)
     print(result)
 
 
-main()
+main(*argv[1:])
