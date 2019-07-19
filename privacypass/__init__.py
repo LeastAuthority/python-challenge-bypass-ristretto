@@ -14,6 +14,9 @@ class TokenException(Exception):
 class DecodeException(Exception):
     pass
 
+class SecurityException(Exception):
+    pass
+
 
 def _raw_attr():
     def not_null(self, attribute, value):
@@ -135,7 +138,7 @@ class VerificationKey(object):
         return VerificationSignature(
             _call_with_raising(
                 ffi.NULL,
-                Exception,
+                KeyException,
                 lib.verification_key_sign_sha512,
                 self._raw,
                 message,
@@ -160,12 +163,18 @@ class VerificationSignature(_Serializable):
     _decoder = lib.verification_signature_decode_base64
 
 
-class RandomToken(object):
-    def __init__(self):
-        self._raw = _call_with_raising(
-            ffi.NULL,
-            TokenException,
-            lib.token_random,
+class RandomToken(_Serializable):
+    _encoder = lib.token_encode_base64
+    _decoder = lib.token_decode_base64
+
+    @classmethod
+    def create(cls):
+        return cls(
+            _call_with_raising(
+                ffi.NULL,
+                TokenException,
+                lib.token_random,
+            ),
         )
 
     def blind(self):
@@ -179,20 +188,21 @@ class RandomToken(object):
         )
 
 
-class PublicKey(object):
-    def __init__(self, skey):
-        assert(isinstance(skey, SigningKey))
+class PublicKey(_Serializable):
+    _encoder = lib.public_key_encode_base64
+    _decoder = lib.public_key_decode_base64
 
-        raw = lib.signing_key_get_public_key(skey._raw)
-        if raw == ffi.NULL:
-            raise KeyException("pubkey generation from signing key failed")
-        self._raw = raw
+    @classmethod
+    def from_signing_key(cls, signing_key):
+        return cls(
+            _call_with_raising(
+                ffi.NULL,
+                KeyException,
+                lib.signing_key_get_public_key,
+                signing_key._raw,
+            ),
+        )
 
-    def unmarshal_text(text):
-        val = lib.public_key_decode_base64(s)
-        if val == ffi.NULL:
-            raise KeyException("Public Key base64 Decode failed")
-        self._raw = val
 
 class BatchDLEQProof(_Serializable):
     _encoder = lib.batch_dleq_proof_encode_base64
@@ -230,7 +240,7 @@ class BatchDLEQProof(_Serializable):
             public_key._raw,
         )
         if invalid_or_unblind != 0:
-            raise Exception("invalid batch proof ({})".format(invalid_or_unblind))
+            raise SecurityException("invalid batch proof ({})".format(invalid_or_unblind))
         return list(
             UnblindedToken(unblinded_tokens_OUT[n])
             for n

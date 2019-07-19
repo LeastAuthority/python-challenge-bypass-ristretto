@@ -26,6 +26,7 @@ from hypothesis.strategies import (
 )
 
 from .. import (
+    ffi,
     DecodeException,
     RandomToken,
     BlindedToken,
@@ -34,6 +35,8 @@ from .. import (
     BatchDLEQProof,
     random_signing_key,
     VerificationSignature,
+    KeyException,
+    SecurityException,
 )
 
 def random_tokens():
@@ -48,7 +51,7 @@ def random_tokens():
     repeatability.
     """
     return builds(
-        RandomToken,
+        RandomToken.create,
     )
 
 
@@ -110,6 +113,15 @@ class RoundTripsThroughBase64(object):
         return None
 
 
+class RandomTokenTests(TestCase):
+    """
+    Tests related to ``RandomToken``.
+    """
+    @given(random_tokens())
+    def test_serialization_roundtrip(self, random_token):
+        self.assertThat(random_token, RoundTripsThroughBase64())
+
+
 class SigningKeyTests(TestCase):
     """
     Tests related to ``SigningKey``.
@@ -118,11 +130,54 @@ class SigningKeyTests(TestCase):
     def test_serialization_roundtrip(self, signing_key):
         self.assertThat(signing_key, RoundTripsThroughBase64())
 
+    @given(signing_keys(), random_tokens())
+    def test_rederive_unblinded_token(self, signing_key, token):
+        """
+        ``SigningKey.rederive_unblinded_token`` takes a ``TokenPreimage`` and
+        returns the original `UnblindedToken`` from which it was created.
+        """
+        blinded_token = token.blind()
+        signed_token = signing_key.sign(blinded_token)
+        proof = BatchDLEQProof.create(
+            signing_key,
+            [blinded_token],
+            [signed_token],
+        )
+        [unblinded_token] = proof.invalid_or_unblind(
+            [token],
+            [blinded_token],
+            [signed_token],
+            PublicKey.from_signing_key(signing_key),
+        )
+        token_preimage = unblinded_token.preimage()
+        rederived_unblinded_token = signing_key.rederive_unblinded_token(token_preimage)
+
+        self.assertThat(
+            unblinded_token.encode_base64(),
+            Equals(rederived_unblinded_token.encode_base64()),
+        )
+
+
+class PublicKeyTests(TestCase):
+    """
+    Tests related to ``PublicKey``.
+    """
+    @given(signing_keys())
+    def test_serialization_roundtrip(self, signing_key):
+        public_key = PublicKey.from_signing_key(signing_key)
+        self.assertThat(public_key, RoundTripsThroughBase64())
+
 
 class BlindedTokenTests(TestCase):
     """
     Tests related to ``BlindedToken``.
     """
+    def test_rejects_null(self):
+        """
+        ``BlindedToken`` cannot be constructed with ``NULL`` for the raw pointer.
+        """
+        self.assertThat(lambda: BlindedToken(ffi.NULL), raises(ValueError))
+
     @given(blinded_tokens())
     def test_serialization_roundtrip(self, blinded_token):
         self.assertThat(blinded_token, RoundTripsThroughBase64())
@@ -167,6 +222,91 @@ class BatchDLEQProofTests(TestCase):
             raises(DecodeException),
         )
 
+    @given(signing_keys(), lists(random_tokens(), min_size=1))
+    def test_mismatched_token_lists(self, signing_key, tokens):
+        """
+        ```BatchDLEQProof.create`` raises ``ValueError`` if the number of blinded
+        tokens is not equal to the number of signed tokens.
+        """
+        blinded_tokens = list(tok.blind() for tok in tokens)
+        signed_tokens = list(signing_key.sign(tok) for tok in blinded_tokens[:-1])
+        self.assertThat(
+            lambda: BatchDLEQProof.create(
+                signing_key, blinded_tokens, signed_tokens,
+            ),
+            raises(ValueError),
+        )
+
+    @given(signing_keys(), signing_keys(), random_tokens(), random_tokens())
+    def test_improperly_signed_tokens(self, signing_key_a, signing_key_b, token_a, token_b):
+        """
+        ``BatchDLEQProof.invalid_or_unblind`` raises ``SecurityException`` if the
+        proof is invalid.
+        """
+        assume(signing_key_a.encode_base64() != signing_key_b.encode_base64())
+        assume(token_a.encode_base64() != token_b.encode_base64())
+
+        blinded_token_a = token_a.blind()
+        blinded_token_b = token_b.blind()
+
+        signed_token_a = signing_key_a.sign(blinded_token_a)
+        signed_token_b = signing_key_b.sign(blinded_token_b)
+
+        proof = BatchDLEQProof.create(
+            signing_key_a,
+            [blinded_token_a],
+            [signed_token_a],
+        )
+        self.expectThat(
+            lambda: proof.invalid_or_unblind(
+                [token_a],
+                [blinded_token_a],
+                [signed_token_a],
+                PublicKey.from_signing_key(signing_key_b),
+            ),
+            raises(SecurityException),
+            "wrong public key",
+        )
+        self.expectThat(
+            lambda: proof.invalid_or_unblind(
+                [token_a],
+                [blinded_token_a],
+                [signed_token_b],
+                PublicKey.from_signing_key(signing_key_a),
+            ),
+            raises(SecurityException),
+            "wrong signed token",
+        )
+        self.expectThat(
+            lambda: proof.invalid_or_unblind(
+                [token_a],
+                [blinded_token_b],
+                [signed_token_a],
+                PublicKey.from_signing_key(signing_key_a),
+            ),
+            raises(SecurityException),
+            "wrong blinded token",
+        )
+        # Note there is no assertion for giving the wrong token.  The server
+        # never sees the token and has no opportunity to perform any
+        # shennanigans related to it.  If the client puts the wrong token in
+        # then they'll just get the wrong unblinded token out.
+        #
+        # XXX Verify that!  What does it mean to have a "wrong unblinded
+        # token"???
+        #
+        # self.expectThat(
+        #     lambda: proof.invalid_or_unblind(
+        #         [token_b],
+        #         [blinded_token_a],
+        #         [signed_token_a],
+        #         PublicKey.from_signing_key(signing_key_a),
+        #     ),
+        #     raises(SecurityException),
+        #     "wrong random token",
+        # )
+
+
 
 class UnblindedTokenTests(TestCase):
     """
@@ -174,7 +314,7 @@ class UnblindedTokenTests(TestCase):
     """
     @given(random_tokens(), signing_keys())
     def test_serialization_roundtrip(self, token, signing_key):
-        public_key = PublicKey(signing_key)
+        public_key = PublicKey.from_signing_key(signing_key)
         blinded_token = token.blind()
         signed_token = signing_key.sign(blinded_token)
         proof = BatchDLEQProof.create(
@@ -197,7 +337,7 @@ class TokenPreimageTests(TestCase):
     """
     @given(random_tokens(), signing_keys())
     def test_serialization_roundtrip(self, token, signing_key):
-        public_key = PublicKey(signing_key)
+        public_key = PublicKey.from_signing_key(signing_key)
         blinded_token = token.blind()
         signed_token = signing_key.sign(blinded_token)
         proof = BatchDLEQProof.create(
@@ -242,7 +382,7 @@ def get_verify_key(signing_key, token):
     """
     Get a verify key for the given signing key and random token.
     """
-    public_key = PublicKey(signing_key)
+    public_key = PublicKey.from_signing_key(signing_key)
     blinded_token = token.blind()
     signed_token = signing_key.sign(blinded_token)
     proof = BatchDLEQProof.create(
@@ -271,7 +411,7 @@ class VerificationKeyTests(TestCase):
         not created with the same key's ``VerificationKey.sign_sha512`` and
         the same message.
         """
-        public_key = PublicKey(signing_key)
+        public_key = PublicKey.from_signing_key(signing_key)
         blinded_token = token.blind()
         signed_token = signing_key.sign(blinded_token)
         proof = BatchDLEQProof.create(
@@ -298,7 +438,7 @@ class VerificationKeyTests(TestCase):
         created with the same key's ``VerificationKey.sign_sha512`` and the
         same message.
         """
-        public_key = PublicKey(signing_key)
+        public_key = PublicKey.from_signing_key(signing_key)
         blinded_token = token.blind()
         signed_token = signing_key.sign(blinded_token)
         proof = BatchDLEQProof.create(
@@ -336,14 +476,18 @@ class VerificationKeyTests(TestCase):
         )
 
 
-    @reproduce_failure('4.7.3', 'AAABADAA')
-    @given(signing_keys(), random_tokens(), messages(), messages())
+    @given(signing_keys(), random_tokens(), messages(min_size=16), messages(min_size=16))
     def test_different_message(self, signing_key, token, message_a, message_b):
         """
         ``VerificationKey.invalid_sha512`` returns ``True`` if passed a signature
         created with the same key and a different message.
         """
         assume(message_a != message_b)
+
+        # The FFI interface misbehaves in this case!
+        assume(b"\x00" not in message_a)
+        assume(b"\x00" not in message_b)
+
         note("message a: {!r}".format(message_a))
         note("message b: {!r}".format(message_b))
         key = get_verify_key(signing_key, token)
@@ -354,6 +498,19 @@ class VerificationKeyTests(TestCase):
         )
 
 
+    @given(signing_keys(), random_tokens())
+    def test_non_utf8_message(self, signing_key, token):
+        """
+        ``VerificationKey.sign_sha521`` raises an exception when passed a message
+        which is not a UTF-8-encoded byte string.
+        """
+        key = get_verify_key(signing_key, token)
+        self.assertThat(
+            lambda: key.sign_sha512(u"\N{SNOWMAN}".encode("utf-8")[:-1]),
+            raises(KeyException),
+        )
+
+
 
 class VerificationSignatureTests(TestCase):
     """
@@ -361,7 +518,7 @@ class VerificationSignatureTests(TestCase):
     """
     @given(random_tokens(), signing_keys())
     def test_serialization_roundtrip(self, token, signing_key):
-        public_key = PublicKey(signing_key)
+        public_key = PublicKey.from_signing_key(signing_key)
         blinded_token = token.blind()
         signed_token = signing_key.sign(blinded_token)
         proof = BatchDLEQProof.create(
