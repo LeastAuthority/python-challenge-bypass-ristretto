@@ -1,3 +1,5 @@
+import attr
+
 from privacypass._native import ffi, lib
 
 def to_string(v):
@@ -12,137 +14,173 @@ class TokenException(Exception):
 class DecodeException(Exception):
     pass
 
+
+def _raw_attr():
+    def not_null(self, attribute, value):
+        if value == ffi.NULL:
+            raise ValueError("raw pointer must not be NULL")
+    return attr.ib(validator=not_null)
+
+
+def _call_with_raising(exc_val, exc_type, f, *a):
+    result = f(*a)
+    if result == exc_val:
+        raise exc_type(to_string(lib.last_error_message()))
+    return result
+
+
 def random_signing_key():
-    k = lib.signing_key_random()
-    if k == ffi.NULL:
-        raise KeyException()
-    return SigningKey(k)
+    return SigningKey(
+        _call_with_raising(
+            ffi.NULL,
+            KeyException,
+            lib.signing_key_random,
+        ),
+    )
 
-class SigningKey(object):
-    def __init__(self, v):
-        self._raw = v
 
-    def sign(self, blinded_token):
-        assert(isinstance(blinded_token, BlindedToken))
-
-        signed_token = lib.signing_key_sign(self._raw, blinded_token._raw)
-        if signed_token == ffi.NULL:
-            raise KeyException("failed to sign token")
-        return SignedToken(signed_token)
-
-    def rederive_unblinded_token(self, token_preimage):
-        return UnblindedToken(lib.signing_key_rederive_unblinded_token(self._raw, token_preimage._raw))
+@attr.s
+class _Serializable(object):
+    _raw = _raw_attr()
 
     def encode_base64(self):
-        return to_string(lib.signing_key_encode_base64(self._raw))
-
-    @classmethod
-    def decode_base64(cls, text):
-        decoded = lib.signing_key_decode_base64(text)
-        if decoded == ffi.NULL:
-            raise DecodeException()
-        return cls(decoded)
-
-
-class SignedToken(object):
-    def __init__(self, v):
-        self._raw = v
-
-    def encode_base64(self):
-        return to_string(lib.signed_token_encode_base64(self._raw))
-
-    @classmethod
-    def decode_base64(cls, text):
-        decoded = lib.signed_token_decode_base64(text)
-        if decoded == ffi.NULL:
-            raise DecodeException()
-        return cls(decoded)
-
-
-class BlindedToken(object):
-    def __init__(self, v):
-        self._raw = v
-
-    def to_str(self):
-        return ffi.string(self._raw)
-
-    def encode_base64(self):
-        encoded = lib.blinded_token_encode_base64(self._raw)
+        # We don't use _call_with_raising for encoding and decoding because
+        # they don't set last error message (I guess).
+        encoded = self._encoder(self._raw)
         if encoded == ffi.NULL:
             raise TokenException("encoding token to base64 bytes failed")
         return to_string(encoded)
 
     @classmethod
     def decode_base64(cls, text):
-        decoded = lib.blinded_token_decode_base64(text)
-        if decoded == ffi.NULL:
-            raise DecodeException("failed to decode blinded token")
-        return cls(decoded)
-
-class UnblindedToken(object):
-    def __init__(self, v):
-        self._raw = v
-
-    def preimage(self):
-        return TokenPreimage(lib.unblinded_token_preimage(self._raw))
-
-    def derive_verification_key_sha512(self):
-        return VerificationKey(lib.unblinded_token_derive_verification_key_sha512(self._raw))
-
-class TokenPreimage(object):
-    def __init__(self, v):
-        self._raw = v
-
-    def encode_base64(self):
-        return to_string(lib.token_preimage_encode_base64(self._raw))
-
-    @classmethod
-    def decode_base64(cls, text):
-        decoded = lib.token_preimage_decode_base64(text)
+        decoded = cls._decoder(text)
         if decoded == ffi.NULL:
             raise DecodeException()
         return cls(decoded)
 
 
+class SigningKey(_Serializable):
+    _encoder = lib.signing_key_encode_base64
+    _decoder = lib.signing_key_decode_base64
+
+    def sign(self, blinded_token):
+        assert(isinstance(blinded_token, BlindedToken))
+
+        signed_token = _call_with_raising(
+            ffi.NULL,
+            KeyException,
+            lib.signing_key_sign,
+            self._raw,
+            blinded_token._raw,
+        )
+        return SignedToken(signed_token)
+
+    def rederive_unblinded_token(self, token_preimage):
+        return UnblindedToken(
+            _call_with_raising(
+                ffi.NULL,
+                Exception,
+                lib.signing_key_rederive_unblinded_token,
+                self._raw,
+                token_preimage._raw,
+            ),
+        )
+
+
+class SignedToken(_Serializable):
+    _encoder = lib.signed_token_encode_base64
+    _decoder = lib.signed_token_decode_base64
+
+
+class BlindedToken(_Serializable):
+    _encoder = lib.blinded_token_encode_base64
+    _decoder = lib.blinded_token_decode_base64
+
+    def to_str(self):
+        return ffi.string(self._raw)
+
+
+class UnblindedToken(_Serializable):
+    _encoder = lib.unblinded_token_encode_base64
+    _decoder = lib.unblinded_token_decode_base64
+
+    def preimage(self):
+        return TokenPreimage(
+            _call_with_raising(
+                ffi.NULL,
+                Exception,
+                lib.unblinded_token_preimage,
+                self._raw,
+            ),
+        )
+
+    def derive_verification_key_sha512(self):
+        return VerificationKey(
+            _call_with_raising(
+                ffi.NULL,
+                Exception,
+                lib.unblinded_token_derive_verification_key_sha512,
+                self._raw,
+            ),
+        )
+
+
+class TokenPreimage(_Serializable):
+    _encoder = lib.token_preimage_encode_base64
+    _decoder = lib.token_preimage_decode_base64
+
+
+@attr.s
 class VerificationKey(object):
-    def __init__(self, v):
-        self._raw = v
+    _raw = _raw_attr()
 
     def sign_sha512(self, message):
-        return VerificationSignature(lib.verification_key_sign_sha512(self._raw, message))
+        return VerificationSignature(
+            _call_with_raising(
+                ffi.NULL,
+                Exception,
+                lib.verification_key_sign_sha512,
+                self._raw,
+                message,
+            ),
+        )
 
     def invalid_sha512(self, signature, message):
-        return lib.verification_key_invalid_sha512(
+        result = _call_with_raising(
+            -1,
+            Exception,
+            lib.verification_key_invalid_sha512,
             self._raw,
             signature._raw,
             message,
         )
+        assert result in (0, 1)
+        return bool(result)
 
 
-class VerificationSignature(object):
-    def __init__(self, v):
-        self._raw = v
+class VerificationSignature(_Serializable):
+    _encoder = lib.verification_signature_encode_base64
+    _decoder = lib.verification_signature_decode_base64
 
-    def encode_base64(self):
-        return to_string(lib.verification_signature_encode_base64(self._raw))
-
-    @classmethod
-    def decode_base64(cls, text):
-        return cls(lib.verification_signature_decode_base64(text))
 
 class RandomToken(object):
     def __init__(self):
-
-        raw = lib.token_random()
-        if raw == ffi.NULL:
-            raise TokenException("token generation failed")
-        self._raw = raw
+        self._raw = _call_with_raising(
+            ffi.NULL,
+            TokenException,
+            lib.token_random,
+        )
 
     def blind(self):
-        raw = lib.token_blind(self._raw)
-        if raw == ffi.NULL:
-            raise TokenException("failed to blind the token")
-        return BlindedToken(raw)
+        return BlindedToken(
+            _call_with_raising(
+                ffi.NULL,
+                TokenException,
+                lib.token_blind,
+                self._raw,
+            ),
+        )
+
 
 class PublicKey(object):
     def __init__(self, skey):
@@ -159,7 +197,10 @@ class PublicKey(object):
             raise KeyException("Public Key base64 Decode failed")
         self._raw = val
 
-class BatchDLEQProof(object):
+class BatchDLEQProof(_Serializable):
+    _encoder = lib.batch_dleq_proof_encode_base64
+    _decoder = lib.batch_dleq_proof_decode_base64
+
     @classmethod
     def create(cls, signing_key, blinded_tokens, signed_tokens):
         if len(blinded_tokens) != len(signed_tokens):
@@ -171,19 +212,6 @@ class BatchDLEQProof(object):
             len(blinded_tokens),
             signing_key._raw,
         ))
-
-    def __init__(self, proof):
-        self._raw = proof
-
-    def encode_base64(self):
-        return to_string(lib.batch_dleq_proof_encode_base64(self._raw))
-
-    @classmethod
-    def decode_base64(cls, text):
-        raw = lib.batch_dleq_proof_decode_base64(text)
-        if raw == ffi.NULL:
-            raise DecodeException("failed to decode the object")
-        return cls(raw)
 
     def destroy(self):
         lib.batch_dleq_proof_destroy(self._raw)

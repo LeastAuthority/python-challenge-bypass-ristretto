@@ -1,19 +1,26 @@
+from base64 import (
+    b64encode,
+)
 from testtools import (
     TestCase,
 )
 from testtools.matchers import (
     Mismatch,
     raises,
+    Equals,
 )
 from testtools.content import (
     text_content,
 )
 from hypothesis import (
     given,
+    assume,
 )
 from hypothesis.strategies import (
     builds,
     lists,
+    binary,
+    text,
 )
 
 from .. import (
@@ -24,6 +31,7 @@ from .. import (
     PublicKey,
     BatchDLEQProof,
     random_signing_key,
+    VerificationSignature,
 )
 
 def random_tokens():
@@ -158,9 +166,32 @@ class BatchDLEQProofTests(TestCase):
         )
 
 
+class UnblindedTokenTests(TestCase):
+    """
+    Tests related to ``UnblindedToken``.
+    """
+    @given(random_tokens(), signing_keys())
+    def test_serialization_roundtrip(self, token, signing_key):
+        public_key = PublicKey(signing_key)
+        blinded_token = token.blind()
+        signed_token = signing_key.sign(blinded_token)
+        proof = BatchDLEQProof.create(
+            signing_key,
+            [blinded_token],
+            [signed_token],
+        )
+        [unblinded_token] = proof.invalid_or_unblind(
+            [token],
+            [blinded_token],
+            [signed_token],
+            public_key,
+        )
+        self.assertThat(unblinded_token, RoundTripsThroughBase64())
+
+
 class TokenPreimageTests(TestCase):
     """
-    Tests r elated to ``TokenPreimage``.
+    Tests related to ``TokenPreimage``.
     """
     @given(random_tokens(), signing_keys())
     def test_serialization_roundtrip(self, token, signing_key):
@@ -180,3 +211,166 @@ class TokenPreimageTests(TestCase):
         )
         preimage = unblinded_token.preimage()
         self.assertThat(preimage, RoundTripsThroughBase64())
+
+
+# The signature uses sha512.
+SIG_SIZE = 512 / 8
+def verification_signatures():
+    """
+    Strategy that builds byte strings that are the right length to be
+    signatures by the verification key.
+    """
+    return binary(
+        min_size=SIG_SIZE,
+        max_size=SIG_SIZE,
+    ).map(
+        lambda b: VerificationSignature.decode_base64(b64encode(b)),
+    )
+
+
+def messages(*a, **kw):
+    """
+    Strategy that builds byte strings that can be messages to be signed by a
+    verification key.
+    """
+    return text(*a, **kw).map(lambda t: t.encode("utf-8"))
+
+
+def get_verify_key(signing_key, token):
+    """
+    Get a verify key for the given signing key and random token.
+    """
+    public_key = PublicKey(signing_key)
+    blinded_token = token.blind()
+    signed_token = signing_key.sign(blinded_token)
+    proof = BatchDLEQProof.create(
+        signing_key,
+        [blinded_token],
+        [signed_token],
+    )
+    [unblinded_token] = proof.invalid_or_unblind(
+        [token],
+        [blinded_token],
+        [signed_token],
+        public_key,
+    )
+    verification_key = unblinded_token.derive_verification_key_sha512()
+    return verification_key
+
+
+class VerificationKeyTests(TestCase):
+    """
+    Tests related to ``VerificationKey``.
+    """
+    @given(random_tokens(), signing_keys(), messages(), verification_signatures())
+    def test_bad_signature(self, token, signing_key, message, bad_signature):
+        """
+        ``VerificationKey.invalid_sha512`` returns ``True`` if passed a signature
+        not created with the same key's ``VerificationKey.sign_sha512`` and
+        the same message.
+        """
+        public_key = PublicKey(signing_key)
+        blinded_token = token.blind()
+        signed_token = signing_key.sign(blinded_token)
+        proof = BatchDLEQProof.create(
+            signing_key,
+            [blinded_token],
+            [signed_token],
+        )
+        [unblinded_token] = proof.invalid_or_unblind(
+            [token],
+            [blinded_token],
+            [signed_token],
+            public_key,
+        )
+        verification_key = unblinded_token.derive_verification_key_sha512()
+        self.assertThat(
+            verification_key.invalid_sha512(bad_signature, message),
+            Equals(True),
+        )
+
+    @given(random_tokens(), signing_keys(), messages())
+    def test_good_signature(self, token, signing_key, message):
+        """
+        ``VerificationKey.invalid_sha512`` returns ``False`` if passed a signature
+        created with the same key's ``VerificationKey.sign_sha512`` and the
+        same message.
+        """
+        public_key = PublicKey(signing_key)
+        blinded_token = token.blind()
+        signed_token = signing_key.sign(blinded_token)
+        proof = BatchDLEQProof.create(
+            signing_key,
+            [blinded_token],
+            [signed_token],
+        )
+        [unblinded_token] = proof.invalid_or_unblind(
+            [token],
+            [blinded_token],
+            [signed_token],
+            public_key,
+        )
+        verification_key = unblinded_token.derive_verification_key_sha512()
+        good_signature = verification_key.sign_sha512(message)
+        self.assertThat(
+            verification_key.invalid_sha512(good_signature, message),
+            Equals(False),
+        )
+
+
+    @given(random_tokens(), random_tokens(), signing_keys(), messages())
+    def test_different_key(self, token_a, token_b, signing_key, message):
+        """
+        ``VerificationKey.invalid_sha512`` returns ``True`` if passed a signature
+        created with a different key and the same message.
+        """
+        key_a = get_verify_key(signing_key, token_a)
+        key_b = get_verify_key(signing_key, token_b)
+        sig_a = key_a.sign_sha512(message)
+        sig_b = key_b.sign_sha512(message)
+        self.assertThat(
+            key_a.invalid_sha512(sig_b, message),
+            Equals(True),
+        )
+
+
+    @given(signing_keys(), random_tokens(), messages(), messages())
+    def test_different_message(self, signing_key, token, message_a, message_b):
+        """
+        ``VerificationKey.invalid_sha512`` returns ``True`` if passed a signature
+        created with the same key and a different message.
+        """
+        assume(message_a != message_b)
+        key = get_verify_key(signing_key, token)
+        sig_a = key.sign_sha512(message_a)
+        self.assertThat(
+            key.invalid_sha512(sig_a, message_b),
+            Equals(True),
+        )
+
+
+
+class VerificationSignatureTests(TestCase):
+    """
+    Tests related to ``VerificationSignature``.
+    """
+    @given(random_tokens(), signing_keys())
+    def test_serialization_roundtrip(self, token, signing_key):
+        public_key = PublicKey(signing_key)
+        blinded_token = token.blind()
+        signed_token = signing_key.sign(blinded_token)
+        proof = BatchDLEQProof.create(
+            signing_key,
+            [blinded_token],
+            [signed_token],
+        )
+        [unblinded_token] = proof.invalid_or_unblind(
+            [token],
+            [blinded_token],
+            [signed_token],
+            public_key,
+        )
+        verification_key = unblinded_token.derive_verification_key_sha512()
+        verification_sig = verification_key.sign_sha512(b"message")
+
+        self.assertThat(verification_sig, RoundTripsThroughBase64())

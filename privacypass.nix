@@ -1,6 +1,6 @@
 # A basic packaging of this very project: Python bindings to the Rust
 # Ristretto implementation.
-{ ristretto, git, python, pythonPackages, setuptools_scm, milksnake, cffi, testtools, hypothesis }:
+{ ristretto, git, python, pythonPackages, setuptools_scm, milksnake, cffi, attrs, testtools, hypothesis }:
 pythonPackages.buildPythonPackage rec {
   version = "0.0.0";
   pname = "privacypass";
@@ -32,6 +32,7 @@ pythonPackages.buildPythonPackage rec {
   propagatedBuildInputs = [
     # the bindings are cffi-based
     cffi
+    attrs
   ];
 
   buildInputs = [
