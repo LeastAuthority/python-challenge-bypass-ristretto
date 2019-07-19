@@ -18,7 +18,7 @@ def debug(*a, **kw):
 def main():
     debug("generating tokens")
     # Client
-    clients_tokens = list(RandomToken() for _ in range(100))
+    clients_tokens = list(RandomToken.create() for _ in range(100))
     debug("blinding tokens")
     clients_blinded_tokens = list(
         token.blind()
@@ -36,7 +36,7 @@ def main():
     debug("generating signing key")
     servers_signing_key = random_signing_key()
     debug("extracting public key")
-    servers_public_key = PublicKey(servers_signing_key)
+    servers_public_key = PublicKey.from_signing_key(servers_signing_key)
     debug("unmarshaling blinded tokens")
     servers_blinded_tokens = list(
         BlindedToken.decode_base64(marshaled_blinded_token)
