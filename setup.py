@@ -18,7 +18,7 @@ def readme():
 
 setup(
     name='privacypass',
-    packages=['privacypass'],
+    packages=['privacypass', 'privacypass.tests'],
     zip_safe=False,
     platforms='any',
     setup_requires=['milksnake', 'setuptools_scm'],
