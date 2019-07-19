@@ -96,9 +96,6 @@ class BlindedToken(_Serializable):
     _encoder = lib.blinded_token_encode_base64
     _decoder = lib.blinded_token_decode_base64
 
-    def to_str(self):
-        return ffi.string(self._raw)
-
 
 class UnblindedToken(_Serializable):
     _encoder = lib.unblinded_token_encode_base64
