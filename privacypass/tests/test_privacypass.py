@@ -15,6 +15,8 @@ from testtools.content import (
 from hypothesis import (
     given,
     assume,
+    reproduce_failure,
+    note,
 )
 from hypothesis.strategies import (
     builds,
@@ -334,6 +336,7 @@ class VerificationKeyTests(TestCase):
         )
 
 
+    @reproduce_failure('4.7.3', 'AAABADAA')
     @given(signing_keys(), random_tokens(), messages(), messages())
     def test_different_message(self, signing_key, token, message_a, message_b):
         """
@@ -341,6 +344,8 @@ class VerificationKeyTests(TestCase):
         created with the same key and a different message.
         """
         assume(message_a != message_b)
+        note("message a: {!r}".format(message_a))
+        note("message b: {!r}".format(message_b))
         key = get_verify_key(signing_key, token)
         sig_a = key.sign_sha512(message_a)
         self.assertThat(
