@@ -223,7 +223,7 @@ class BatchDLEQProofTests(TestCase):
         )
 
     @given(signing_keys(), lists(random_tokens(), min_size=1))
-    def test_mismatched_token_lists(self, signing_key, tokens):
+    def test_create_with_mismatched_token_lists(self, signing_key, tokens):
         """
         ```BatchDLEQProof.create`` raises ``ValueError`` if the number of blinded
         tokens is not equal to the number of signed tokens.
@@ -233,6 +233,45 @@ class BatchDLEQProofTests(TestCase):
         self.assertThat(
             lambda: BatchDLEQProof.create(
                 signing_key, blinded_tokens, signed_tokens,
+            ),
+            raises(ValueError),
+        )
+
+    @given(signing_keys(), lists(random_tokens(), min_size=1))
+    def test_unblind_with_mismatched_token_lists(self, signing_key, tokens):
+        """
+        ```BatchDLEQProof.invalid_or_unblind`` raises ``ValueError`` if the number
+        of tokens, blinded tokens, and signed tokens are not all the same.
+        """
+        blinded_tokens = list(tok.blind() for tok in tokens)
+        signed_tokens = list(signing_key.sign(tok) for tok in blinded_tokens)
+        proof = BatchDLEQProof.create(
+            signing_key, blinded_tokens, signed_tokens,
+        )
+        self.expectThat(
+            lambda: proof.invalid_or_unblind(
+                tokens[:-1],
+                blinded_tokens,
+                signed_tokens,
+                PublicKey.from_signing_key(signing_key),
+            ),
+            raises(ValueError),
+        )
+        self.expectThat(
+            lambda: proof.invalid_or_unblind(
+                tokens,
+                blinded_tokens[:-1],
+                signed_tokens,
+                PublicKey.from_signing_key(signing_key),
+            ),
+            raises(ValueError),
+        )
+        self.expectThat(
+            lambda: proof.invalid_or_unblind(
+                tokens,
+                blinded_tokens,
+                signed_tokens[:-1],
+                PublicKey.from_signing_key(signing_key),
             ),
             raises(ValueError),
         )
