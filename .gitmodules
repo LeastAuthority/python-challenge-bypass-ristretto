@@ -1,3 +1,3 @@
 [submodule "challenge-bypass-ristretto-ffi"]
 	path = challenge-bypass-ristretto-ffi
-	url = git@github.com:brave-intl/challenge-bypass-ristretto-ffi.git
+	url = https://github.com/brave-intl/challenge-bypass-ristretto-ffi
