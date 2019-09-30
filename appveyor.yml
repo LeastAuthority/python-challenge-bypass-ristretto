@@ -84,4 +84,4 @@ build_script:
 
 test_script:
   # This passes for a test suite.
-  - "spike.py"
+  - ".\\spike.py"
