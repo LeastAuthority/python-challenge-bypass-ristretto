@@ -83,5 +83,8 @@ build_script:
   # - "C:\\projects\\privacypass\\.ci\\appveyor\\build.bat"
 
 test_script:
+  # Get away from the source directory which will just confuse the Python
+  # module system.
+  - "cd C:\\"
   # This passes for a test suite.
   - "python C:\\projects\\privacypass\\spike.py"
