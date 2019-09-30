@@ -72,6 +72,7 @@ version: "0.999.post{build}"
 
 init:
   # Set up the environment so we can build and test.
+  - "SET"
   - ".ci\\appveyor\\init.bat"
 
 build_script:
