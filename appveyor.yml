@@ -73,12 +73,12 @@ version: "0.999.post{build}"
 init:
   # Set up the environment so we can build and test.
   - "SET"
-  - "%APPVEYOR_BUILD_FOLDER%\\.ci\\appveyor\\init.bat"
+  - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
 
 build_script:
   # Use distutils to build the challenge-bypass-ristretto{-ffi} and our extension
   # module.
-  - "%APPVEYOR_BUILD_FOLDER%\\.ci\\appveyor\\build.bat"
+  - "C:\\projects\\privacypass\\.ci\\appveyor\\build.bat"
 
 test_script:
   # This passes for a test suite.
