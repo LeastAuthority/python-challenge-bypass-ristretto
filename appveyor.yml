@@ -75,9 +75,6 @@ build_script:
   - "refreshenv"
   - "git submodule init"
   - "git submodule update"
-  - "cd challenge-bypass-ristretto-ffi"
-  - "cargo build"
-  - "cd .."
   - "python setup.py install"
   # # Set up the environment so we can build and test.
   # - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
