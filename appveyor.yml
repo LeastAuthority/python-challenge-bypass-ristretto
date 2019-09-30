@@ -71,11 +71,14 @@ environment:
 version: "0.999.post{build}"
 
 build_script:
-  # Set up the environment so we can build and test.
-  - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
-  # Use distutils to build the challenge-bypass-ristretto{-ffi} and our extension
-  # module.
-  - "C:\\projects\\privacypass\\.ci\\appveyor\\build.bat"
+  - "choco install rustup.install --version 1.19.0"
+  - "refreshenv"
+  - "cd challenge-bypass-ristretto-ffi & cargo build"
+  # # Set up the environment so we can build and test.
+  # - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
+  # # Use distutils to build the challenge-bypass-ristretto{-ffi} and our extension
+  # # module.
+  # - "C:\\projects\\privacypass\\.ci\\appveyor\\build.bat"
 
 test_script:
   # This passes for a test suite.
