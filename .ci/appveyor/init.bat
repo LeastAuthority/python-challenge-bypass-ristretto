@@ -1,3 +1,5 @@
+@ECHO ON
+
 Rem Get a Rust build toolchain.
 choco install rustup.install --version 1.19.0
 
