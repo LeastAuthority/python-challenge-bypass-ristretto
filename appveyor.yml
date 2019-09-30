@@ -73,6 +73,7 @@ version: "0.999.post{build}"
 build_script:
   - "choco install rustup.install --version 1.19.0"
   - "refreshenv"
+  - "git submodule init"
   - "cd challenge-bypass-ristretto-ffi & cargo build"
   # # Set up the environment so we can build and test.
   # - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
