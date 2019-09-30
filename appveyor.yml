@@ -70,17 +70,9 @@ environment:
 
 version: "0.999.post{build}"
 
-init:
-  # Set up the environment so we can build and test.
-  - "SET"
-  - "dir C:\\"
-  - "dir C:\\projects"
-  - "dir C:\\projects\\privacypass"
-  - "dir C:\\projects\\privacypass\\.ci"
-  - "dir C:\\projects\\privacypass\\.ci\\appveyor"
-  - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
-
 build_script:
+  # Set up the environment so we can build and test.
+  - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
   # Use distutils to build the challenge-bypass-ristretto{-ffi} and our extension
   # module.
   - "C:\\projects\\privacypass\\.ci\\appveyor\\build.bat"
