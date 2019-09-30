@@ -30,6 +30,8 @@ build_script:
   - "git submodule update"
   - "%PYTHON_HOME%\\python setup.py install"
   - "copy spike.py C:\\spike.py"
+  - "%PYTHON_HOME%\\Scripts\pip install wheel"
+  - "%PYTHON_HOME%\\python setup.py bdist_wheel"
   # # Set up the environment so we can build and test.
   # - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
   # # Use distutils to build the challenge-bypass-ristretto{-ffi} and our extension
