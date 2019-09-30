@@ -44,3 +44,7 @@ test_script:
   - "cd C:\\"
   # This passes for a test suite.
   - "%PYTHON_HOME%\\python C:\\spike.py"
+
+artifacts:
+  - path: "dist"
+    name: "Dist"
