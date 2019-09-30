@@ -8,7 +8,7 @@ refreshenv
 
 Rem Build challenge-bypass-ristretto-ffi.
 cd challenge-bypass-ristretto-ffi
-cargo build --lib --release
+cargo build
 
 Rem Install it so we can link the Python extension against it.
 make install
