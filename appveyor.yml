@@ -76,7 +76,7 @@ build_script:
   - "git submodule init"
   - "git submodule update"
   - "python setup.py install"
-  - "copy spike.py C:\spike.py"
+  - "copy spike.py C:\\spike.py"
   # # Set up the environment so we can build and test.
   # - "C:\\projects\\privacypass\\.ci\\appveyor\\init.bat"
   # # Use distutils to build the challenge-bypass-ristretto{-ffi} and our extension
