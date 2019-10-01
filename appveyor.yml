@@ -1,0 +1,48 @@
+# Don't build branch if there is an open PR, to prevent double builds.
+# For now, Appveyor will only build PR commits and not commits to master or
+# commits on random branches without an associated PR.
+skip_branch_with_pr: true
+
+environment:
+  # Only use pre-installed Python versions, which Appveyor may upgrade to a
+  # later point release.  See:
+  # http://www.appveyor.com/docs/installed-software#python
+  matrix:
+    - PYTHON_HOME: C:\\PYTHON27-x64
+      PYTHON_VERSION: "2.7"
+      PYTHON_ARCH: "64"
+    - PYTHON_HOME: C:\\PYTHON37-x64
+      PYTHON_VERSION: "3.7"
+      PYTHON_ARCH: "64"
+
+version: "0.999.post{build}"
+
+build_script:
+  # Get the Rust build tool chain.
+  - "choco install rustup.install --version 1.19.0"
+  # Get it on our %PATH%.
+  - "refreshenv"
+  # Get challenge-bypass-ristretto-ffi source code
+  - "git submodule init"
+  - "git submodule update"
+  # Build the whole thing.
+  - "%PYTHON_HOME%\\python setup.py install"
+  # The source is all in . so move the script somewhere else so we can run it
+  # against the installed version instead of the source tree.  The source tree
+  # version doesn't work because it doesn't have the built extension module in
+  # it.  It's nice to test against the installed version anyway.
+  - "copy spike.py C:\\spike.py"
+  # Build a binary wheel, too.
+  - "%PYTHON_HOME%\\Scripts\\pip install wheel"
+  - "%PYTHON_HOME%\\python setup.py bdist_wheel"
+
+test_script:
+  # Get away from the source directory which will just confuse the Python
+  # module system.
+  - "cd C:\\"
+  # This passes for a test suite.
+  - "%PYTHON_HOME%\\python C:\\spike.py"
+
+artifacts:
+  - path: "dist"
+    name: "Dist"
