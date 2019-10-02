@@ -1,6 +1,6 @@
 # A basic packaging of the Ristretto FFI library (around the Ristretto Crate
 # but that's all handled by Cargo for us).
-{ fetchFromGitHub, rustPlatform }:
+{ stdenv, fetchFromGitHub, rustPlatform, Security ? null }:
 rustPlatform.buildRustPackage rec {
   pname = "ristretto";
   name = "${pname}-${version}";
@@ -15,7 +15,14 @@ rustPlatform.buildRustPackage rec {
     rev = "f88d942ddfaf61a4a6703355a77c4ef71bc95c35";
     sha256 = "1gf7ki3q6d15bq71z8s3pc5l2rsp1zk5bqviqlwq7czg674g7zw2";
   };
-  cargoSha256 = "1qbfp24d21wg13sgzccwn3ndvrzbydg0janxp7mzkjm4a83v0qij";
+
+  # XXX
+  cargoSha256 =
+    if stdenv.isDarwin
+      then "1vfzdvpjj6s94p650zvai8gz89hj5ldrakci5l15n33map1iggch"
+      else "1qbfp24d21wg13sgzccwn3ndvrzbydg0janxp7mzkjm4a83v0qij";
+
+  buildInputs = stdenv.lib.optional stdenv.isDarwin Security;
 
   postInstall = ''
   mkdir $out/include
