@@ -1,6 +1,9 @@
 # https://docs.travis-ci.com/user/reference/osx/
 os: "osx"
 
+# Avoid pulling in the Ruby stuff which we have no use for.
+language: "minimal"
+
 matrix:
   include:
     # https://docs.travis-ci.com/user/reference/osx/#macos-version
