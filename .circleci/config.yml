@@ -28,6 +28,12 @@ jobs:
 
       # Get *our* source code.
       - "checkout"
+      - run:
+          # And the rest of it.
+          name: "Finish checking out source"
+          command: |
+            git submodule init
+            git submodule update
 
       - run:
           name: "Tests"
