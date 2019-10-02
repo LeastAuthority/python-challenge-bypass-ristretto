@@ -12,7 +12,8 @@ matrix:
     - osx_image: "xcode11"
 
 install:
-  - "brew install python@2"
+  # Different osx_images have different HomeBrew/Python@2 state.  Joy.
+  - "brew install python@2 || brew upgrade python@2 || true"
   - "brew install rustup-init"
   - "rustup-init -y --default-host x86_64-apple-darwin --default-toolchain stable"
   - "source ~/.bash_profile"
