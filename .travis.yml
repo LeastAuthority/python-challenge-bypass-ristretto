@@ -1,0 +1,33 @@
+# https://docs.travis-ci.com/user/reference/osx/
+os: "osx"
+
+matrix:
+  include:
+    # https://docs.travis-ci.com/user/reference/osx/#macos-version
+    - osx_image: "xcode9.2"
+      python: "2.7"
+    - osx_image: "xcode10.1"
+      python: "2.7"
+    - osx_image: "xcode11"
+      python: "2.7"
+    - osx_image: "xcode9.2"
+      python: "3.7"
+    - osx_image: "xcode10.1"
+      python: "3.7"
+    - osx_image: "xcode11"
+      python: "3.7"
+
+before_install:
+  - "git submodule init"
+  - "git submodule update"
+
+install:
+  - "brew install rustup-init"
+  - "rustup-init -y --default-host x86_64-apple-darwin --default-toolchain stable"
+  - "source ~/.bash_profile"
+  - "python -m virtualenv ~/venv"
+  - "source ~/venv/bin/activate"
+  - "python -m pip install --editable ."
+
+script:
+  - "python ./spike.py"
