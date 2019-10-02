@@ -1,8 +1,6 @@
 # https://docs.travis-ci.com/user/reference/osx/
 os: "osx"
 
-language: "python"
-
 matrix:
   include:
     # https://docs.travis-ci.com/user/reference/osx/#macos-version
