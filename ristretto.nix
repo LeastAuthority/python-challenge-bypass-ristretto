@@ -1,6 +1,6 @@
 # A basic packaging of the Ristretto FFI library (around the Ristretto Crate
 # but that's all handled by Cargo for us).
-{ stdenv, fetchFromGitHub, rustPlatform, Security ? null }:
+{ stdenv, fetchFromGitHub, rustPlatform, darwin }:
 rustPlatform.buildRustPackage rec {
   pname = "ristretto";
   name = "${pname}-${version}";
@@ -22,7 +22,7 @@ rustPlatform.buildRustPackage rec {
       then "1vfzdvpjj6s94p650zvai8gz89hj5ldrakci5l15n33map1iggch"
       else "1qbfp24d21wg13sgzccwn3ndvrzbydg0janxp7mzkjm4a83v0qij";
 
-  buildInputs = stdenv.lib.optional stdenv.isDarwin Security;
+  nativeBuildInputs = stdenv.lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
 
   postInstall = ''
   mkdir $out/include
