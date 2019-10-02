@@ -1,0 +1,47 @@
+version: 2
+
+jobs:
+  tests:
+    docker:
+      # Run in a highly Nix-capable environment.
+      - image: "nixorg/nix:circleci"
+
+    environment:
+      # Specify a revision of NixOS/nixpkgs to run against.  This essentially
+      # pins the majority of the software involved in the build.  This
+      # revision is selected arbitrarily.  It's somewhat current as of the
+      # time of this comment.  We can bump it to a newer version when that
+      # makes sense.  Meanwhile, the platform won't shift around beneath us
+      # unexpectedly.
+      NIXPKGS_REV: "3c83ad6ac13b67101cc3e2e07781963a010c1624"
+
+    steps:
+      - run:
+          # Get NIX_PATH set for the rest of the job so that the revision of
+          # nixpkgs we selected will be used everywhere Nix pulls in software.
+          # There is no way to set an environment variable containing the
+          # value of another environment variable on CircleCI except to use
+          # the `BASE_ENV` feature as we do here.
+          name: "Setup NIX_PATH Environment Variable"
+          command: |
+            echo "export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/$NIXPKGS_REV.tar.gz" >> $BASH_ENV
+
+      # Get *our* source code.
+      - "checkout"
+      - run:
+          # And the rest of it.
+          name: "Finish checking out source"
+          command: |
+            git submodule init
+            git submodule update
+
+      - run:
+          name: "Tests"
+          command: |
+            nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'
+
+workflows:
+  version: 2
+  all-tests:
+    jobs:
+      - "tests"
