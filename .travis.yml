@@ -13,6 +13,7 @@ matrix:
 
 addons:
   homebrew:
+    update: true
     packages:
       - "python@2"
       - "rustup-init"
