@@ -15,4 +15,4 @@ install:
   - "curl https://nixos.org/nix/install | sh"
 
 script:
-  - ". /Users/travis/.nix-profile/etc/profile.d/nix.sh && nix-shell shell.nix --run 'python ./spike.py'"
+  - ". /Users/travis/.nix-profile/etc/profile.d/nix.sh && nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'"
