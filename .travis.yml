@@ -11,10 +11,6 @@ matrix:
     - osx_image: "xcode10.1"
     - osx_image: "xcode11"
 
-before_install:
-  - "git submodule init"
-  - "git submodule update"
-
 install:
   - "brew upgrade python@2"
   - "brew install rustup-init"
