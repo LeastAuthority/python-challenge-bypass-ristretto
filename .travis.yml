@@ -18,7 +18,7 @@ install:
   - "source ~/.bash_profile"
   - "python -m virtualenv ~/venv"
   - "source ~/venv/bin/activate"
-  - "python -m pip --upgrade pip"
+  - "python -m pip install --upgrade pip"
   - "python -m pip install --editable ."
 
 script:
