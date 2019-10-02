@@ -1,0 +1,19 @@
+version: 2
+
+jobs:
+  tests:
+    docker:
+      # Run in a highly Nix-capable environment.
+      - image: "nixorg/nix:circleci"
+    steps:
+      - "checkout"
+      - run:
+          name: "Tests"
+          command: |
+            nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'
+
+workflows:
+  version: 2
+  all-tests:
+    jobs:
+      - "tests"
