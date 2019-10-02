@@ -16,7 +16,13 @@ rustPlatform.buildRustPackage rec {
     sha256 = "1gf7ki3q6d15bq71z8s3pc5l2rsp1zk5bqviqlwq7czg674g7zw2";
   };
 
-  # XXX
+  # XXX It's not clear why the hash is different on Darwin.  #nixos suggested
+  # something like "Unicode normalization [on files] sometimes differs".  I
+  # didn't find anything in the issue tracker and the paths all look pretty
+  # boring and normal to me but maybe this includes all paths from transitive
+  # dependencies, too.  Anyway, the difference is *stable* so it doesn't
+  # really matter.  It will mean updating two hashes when we bump our
+  # ristretto version but that's not too bad.
   cargoSha256 =
     if stdenv.isDarwin
       then "1vfzdvpjj6s94p650zvai8gz89hj5ldrakci5l15n33map1iggch"
