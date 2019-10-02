@@ -11,20 +11,9 @@ matrix:
     - osx_image: "xcode10.1"
     - osx_image: "xcode11"
 
-addons:
-  homebrew:
-    update: true
-    packages:
-      - "python@2"
-      - "rustup-init"
-
 install:
-  - "rustup-init -y --default-host x86_64-apple-darwin --default-toolchain stable"
-  - "source ~/.bash_profile"
-  - "python -m virtualenv ~/venv"
-  - "source ~/venv/bin/activate"
-  - "python -m pip install --upgrade pip"
-  - "python -m pip install --editable ."
+  - "curl https://nixos.org/nix/install | sh"
 
 script:
-  - "python ./spike.py"
+  - "nix-build"
+  - "nix-shell shell.nix --run 'python ./spike.py'"
