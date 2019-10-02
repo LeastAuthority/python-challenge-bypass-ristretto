@@ -1,6 +1,6 @@
 # A basic packaging of the Ristretto FFI library (around the Ristretto Crate
 # but that's all handled by Cargo for us).
-{ fetchFromGitHub, rustPlatform }:
+{ stdenv, fetchFromGitHub, rustPlatform, darwin }:
 rustPlatform.buildRustPackage rec {
   pname = "ristretto";
   name = "${pname}-${version}";
@@ -15,7 +15,20 @@ rustPlatform.buildRustPackage rec {
     rev = "f88d942ddfaf61a4a6703355a77c4ef71bc95c35";
     sha256 = "1gf7ki3q6d15bq71z8s3pc5l2rsp1zk5bqviqlwq7czg674g7zw2";
   };
-  cargoSha256 = "1qbfp24d21wg13sgzccwn3ndvrzbydg0janxp7mzkjm4a83v0qij";
+
+  # XXX It's not clear why the hash is different on Darwin.  #nixos suggested
+  # something like "Unicode normalization [on files] sometimes differs".  I
+  # didn't find anything in the issue tracker and the paths all look pretty
+  # boring and normal to me but maybe this includes all paths from transitive
+  # dependencies, too.  Anyway, the difference is *stable* so it doesn't
+  # really matter.  It will mean updating two hashes when we bump our
+  # ristretto version but that's not too bad.
+  cargoSha256 =
+    if stdenv.isDarwin
+      then "1vfzdvpjj6s94p650zvai8gz89hj5ldrakci5l15n33map1iggch"
+      else "1qbfp24d21wg13sgzccwn3ndvrzbydg0janxp7mzkjm4a83v0qij";
+
+  nativeBuildInputs = stdenv.lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
 
   postInstall = ''
   mkdir $out/include
