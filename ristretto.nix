@@ -16,6 +16,10 @@ rustPlatform.buildRustPackage rec {
     sha256 = "1gf7ki3q6d15bq71z8s3pc5l2rsp1zk5bqviqlwq7czg674g7zw2";
   };
 
+  # buildRustPackage seems somewhat succeptible to cargoSha256 changes due to
+  # *toolchain* changes rather than crate changes.  If this hash mysteriously
+  # begins to mismatch what's encountered, maybe it's because of a nixpkgs
+  # upgrade. :/ Consider crate2nix as a replacement for this, perhaps.
   cargoSha256 = "1vfzdvpjj6s94p650zvai8gz89hj5ldrakci5l15n33map1iggch";
 
   nativeBuildInputs = stdenv.lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
