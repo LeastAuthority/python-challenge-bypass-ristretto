@@ -13,7 +13,7 @@ jobs:
       # time of this comment.  We can bump it to a newer version when that
       # makes sense.  Meanwhile, the platform won't shift around beneath us
       # unexpectedly.
-      NIXPKGS_REV: "3c83ad6ac13b67101cc3e2e07781963a010c1624"
+      NIXPKGS_REV: "5d5cd70516001e79516d2ade8bcf31df208a4ef3"
 
     steps:
       - run:
@@ -24,7 +24,7 @@ jobs:
           # the `BASE_ENV` feature as we do here.
           name: "Setup NIX_PATH Environment Variable"
           command: |
-            echo "export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/$NIXPKGS_REV.tar.gz" >> $BASH_ENV
+            echo "export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$NIXPKGS_REV.tar.gz" >> $BASH_ENV
 
       # Get *our* source code.
       - "checkout"
