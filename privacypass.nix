@@ -33,13 +33,13 @@ pythonPackages.buildPythonPackage rec {
     # the bindings are cffi-based
     cffi
     attrs
+    # required to build and use the cffi extension module
+    milksnake
   ];
 
   buildInputs = [
     # required to provide metadata for the build
     setuptools_scm
-    # required to build the cffi extension module
-    milksnake
   ];
 
   checkInputs = [
