@@ -19,7 +19,7 @@ version: "0.999.post{build}"
 
 build_script:
   # Get the Rust build tool chain.
-  - "choco install rustup.install --version 1.19.0"
+  - "choco install rustup.install --version 1.19.0 --checksum 9F9E33FA4759075EC60E4DA13798D1D66A4C2F43C5500E08714399313409DCF5"
   # Get it on our %PATH%.
   - "refreshenv"
   # Get challenge-bypass-ristretto-ffi source code
