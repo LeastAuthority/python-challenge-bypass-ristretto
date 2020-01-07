@@ -22,7 +22,7 @@ setup(
     zip_safe=False,
     platforms='any',
     setup_requires=['milksnake', 'setuptools_scm'],
-    install_requires=['milksnake', 'cffi', 'attrs'],
+    install_requires=['cffi', 'attrs'],
     extras_require={
         "tests": [
             "testtools",
