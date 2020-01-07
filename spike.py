@@ -205,8 +205,9 @@ def timing(label, count):
     print("{},{},{:0.2f}".format(label, count, (after - before) * 1000))
 
 def main(count=b"100"):
-    # From the protocol, "R".  From the PrivacyPass explanation, "request binding data".
-    message = b"allocate_buckets {storage_index}".format(storage_index=b"ABCDEFGH")
+    # From the protocol, "R".  From the PrivacyPass explanation, "request
+    # binding data".
+    message = b"allocate_buckets ABCDEFGH"
 
     debug("generating signing key")
     server = Server(random_signing_key())
