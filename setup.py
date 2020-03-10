@@ -9,7 +9,7 @@ def build_native(spec):
         # The Python module name
         module_path='challenge_bypass_ristretto._native',
         # The C library being bound
-        dylib=lambda: build.find_dylib('challenge_bypass_ristretto', in_path='target/release'),
+        dylib=lambda: build.find_dylib('challenge_bypass_ristretto_ffi', in_path='target/release'),
         header_filename=lambda: build.find_header('lib.h', in_path='./src'),
         rtld_flags=['NOW', 'NODELETE']
     )
