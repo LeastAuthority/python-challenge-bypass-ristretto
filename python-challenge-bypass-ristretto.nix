@@ -3,7 +3,7 @@
 { ristretto, git, python, pythonPackages, setuptools_scm, milksnake, cffi, attrs, testtools, hypothesis }:
 pythonPackages.buildPythonPackage rec {
   version = "0.0.0";
-  pname = "privacypass";
+  pname = "python-challenge-bypass-ristretto";
   name = "${pname}-${version}";
   src = ./.;
 
