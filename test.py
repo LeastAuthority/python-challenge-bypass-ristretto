@@ -1,4 +1,4 @@
-import privacypass as p
+import challenge_bypass_ristretto as p
 
 def run():
     # server setup

@@ -15,7 +15,7 @@ from sys import (
 
 import attr
 
-from privacypass import (
+from challenge_bypass_ristretto import (
     random_signing_key,
     RandomToken,
     PublicKey,

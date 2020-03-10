@@ -7,7 +7,7 @@ WARNING: These bindings are in very early stages and is not usable yet.
 
 The rust ffi library is a git submodule, so
 ```
-git clone --recursive https://github.com/LeastAuthority/privacypass
+git clone --recursive https://github.com/LeastAuthority/python-challenge-bypass-ristretto
 ```
 should clone everything needed to build
 
@@ -23,4 +23,3 @@ Currently the same license as the Brave's library, Mozilla Public License v2.
 # Copyright
 
 Least Authority TFA GmbH
-
