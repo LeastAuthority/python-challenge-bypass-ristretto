@@ -2,7 +2,7 @@
 let
   defaultCrateOverrides = pkgs.defaultCrateOverrides // {
     curve25519-dalek = attrs: {
-      nativeBuildInputs = lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
+      buildInputs = lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
     };
   };
   challenge-bypass-ristretto = pkgs.callPackage ./generated-challenge-bypass-ristretto.nix {
