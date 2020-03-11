@@ -15,6 +15,10 @@ challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
   pname = "libchallenge_bypass_ristretto";
   version = "1.0.0-pre.1";
   postInstall = ''
+
+  # Newer nixpkgs give Rust crates a "lib" output where we need to put
+  # everything.  Older nixpkgs have lib set to something else (the path to the
+  # .so, it seems) and only have the "out" output and things need to go there.
   if [ ! -d $lib ]; then
     lib=$out/lib
   fi
