@@ -5,7 +5,7 @@
 let
   # Brave's Ristretto library is not in nixpkgs so provide the package we're
   # maintaining.
-  ristretto = (pkgs.callPackage ./challenge-bypass-ristretto.nix { }).rootCrate.build;
+  ristretto = pkgs.callPackage ./challenge-bypass-ristretto.nix { };
 in
   # Build our Python bindings in the usual way, supplying the necessary extra
   # dependency.
