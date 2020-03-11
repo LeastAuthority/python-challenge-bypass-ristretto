@@ -1,12 +1,19 @@
 { pkgs, stdenv, darwin }:
 let
   challenge-bypass-ristretto = pkgs.callPackage ./generated-challenge-bypass-ristretto.nix { };
-in
-  if stdenv.isDarwin then
-    challenge-bypass-ristretto.overrideAttrs (old: {
+  addSecurity = drv:
+    if stdenv.isDarwin then
+      drv.overrideAttrs (old: {
         nativeBuildInputs = [
           darwin.apple_sdk.frameworks.Security
         ];
-    })
-  else
-    challenge-bypass-ristretto
+      })
+    else
+      drv;
+in
+  challenge-bypass-ristretto // {
+    rootCrate = {
+      build = addSecurity challenge-bypass-ristretto.rootCrate.build;
+      debug = addSecurity challenge-bypass-ristretto.rootCrate.debug;
+    };
+  }
