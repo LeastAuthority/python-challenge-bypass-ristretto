@@ -5,6 +5,7 @@ let
   };
   defaultCrateOverrides = pkgs.defaultCrateOverrides // {
     curve25519-dalek = withSecurity;
+    challenge-bypass-ristretto-ffi = withSecurity;
   };
   challenge-bypass-ristretto = pkgs.callPackage ./generated-challenge-bypass-ristretto.nix {
     inherit defaultCrateOverrides;
