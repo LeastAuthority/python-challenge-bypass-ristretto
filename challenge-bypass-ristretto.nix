@@ -3,7 +3,7 @@ let
   challenge-bypass-ristretto = pkgs.callPackage ./generated-challenge-bypass-ristretto.nix { };
   addSecurity = drv:
     if stdenv.isDarwin then
-      drv.overrideDerivation (old: {
+      drv.overrideAttrs (old: {
         nativeBuildInputs = [
           darwin.apple_sdk.frameworks.Security
         ];
