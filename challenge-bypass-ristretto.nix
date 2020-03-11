@@ -3,6 +3,7 @@ let
   withSecurity = attrs: {
     buildInputs = stdenv.lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
   };
+  disableStripping = attrs: attrs // { stripDebugList = null; stripAllList = null; };
   defaultCrateOverrides = pkgs.defaultCrateOverrides // {
     curve25519-dalek = withSecurity;
     challenge-bypass-ristretto-ffi = withSecurity;
@@ -10,12 +11,19 @@ let
   challenge-bypass-ristretto = pkgs.callPackage ./generated-challenge-bypass-ristretto.nix {
     inherit defaultCrateOverrides;
   };
+  challenge-bypass-ristretto' = challenge-bypass-ristretto // {
+    internal = challenge-bypass-ristretto.internal // {
+      crates =
+        stdenv.lib.mapAttrs
+        (name: value: disableStripping value)
+        challenge-bypass-ristretto.internal.crates;
+    };
+  };
 in
-challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
+challenge-bypass-ristretto'.rootCrate.build.overrideAttrs (old: rec {
   pname = "libchallenge_bypass_ristretto";
   version = "1.0.0-pre.1";
   postInstall = ''
-
   # Newer nixpkgs give Rust crates a "lib" output where we need to put
   # everything.  Older nixpkgs have lib set to something else (the path to the
   # .so, it seems) and only have the "out" output and things need to go there.
