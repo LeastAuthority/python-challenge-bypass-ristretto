@@ -1,7 +1,7 @@
-{ pkgs, stdenv, lib, darwin }:
+{ pkgs, stdenv, darwin }:
 let
   withSecurity = attrs: {
-    buildInputs = lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
+    buildInputs = stdenv.lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
   };
   defaultCrateOverrides = pkgs.defaultCrateOverrides // {
     curve25519-dalek = withSecurity;
@@ -15,24 +15,28 @@ challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
   pname = "libchallenge_bypass_ristretto";
   version = "1.0.0-pre.1";
   postInstall = ''
-  mkdir $out/include
-  cp src/lib.h $out/include/
+  if [ ! -d $lib ]; then
+    lib=$out/lib
+  fi
 
-  mkdir -p $out/lib/pkgconfig
-  cat > $out/lib/pkgconfig/${pname}.pc <<EOF
-prefix=$out
-exec_prefix=$out
-libdir=$out/lib
-sharedlibdir=$out/lib
-includedir=$out/include
+  mkdir $lib/include
+  cp src/lib.h $lib/include/
+
+  mkdir $lib/pkgconfig
+  cat > $lib/pkgconfig/${pname}.pc <<EOF
+prefix=$lib
+exec_prefix=$lib
+libdir=$lib
+sharedlibdir=$lib
+includedir=$lib/include
 
 Name: ${pname}
 Description: Ristretto-Flavored PrivacyPass library
 Version: ${version}
 
 Requires:
-Libs: -L$out/lib -lchallenge_bypass_ristretto
-Cflags: -I$out/include
+Libs: -L$lib -lchallenge_bypass_ristretto
+Cflags: -I$lib/include
 EOF
   '';
 })
