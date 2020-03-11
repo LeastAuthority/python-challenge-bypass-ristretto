@@ -3,24 +3,20 @@ let
   withSecurity = attrs: {
     buildInputs = stdenv.lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
   };
-  disableStripping = attrs: attrs // { stripDebugList = null; stripAllList = null; };
+  disableStripping = attrs: attrs // { dontStrip = true; };
   defaultCrateOverrides = pkgs.defaultCrateOverrides // {
     curve25519-dalek = withSecurity;
     challenge-bypass-ristretto-ffi = withSecurity;
   };
+  buildRustCrate = (args: pkgs.buildRustCrate (args // {
+    dontStrip = true;
+  }));
   challenge-bypass-ristretto = pkgs.callPackage ./generated-challenge-bypass-ristretto.nix {
     inherit defaultCrateOverrides;
-  };
-  challenge-bypass-ristretto' = challenge-bypass-ristretto // {
-    internal = challenge-bypass-ristretto.internal // {
-      crates =
-        stdenv.lib.mapAttrs
-        (name: value: disableStripping value)
-        challenge-bypass-ristretto.internal.crates;
-    };
+    inherit buildRustCrate;
   };
 in
-challenge-bypass-ristretto'.rootCrate.build.overrideAttrs (old: rec {
+challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
   pname = "libchallenge_bypass_ristretto";
   version = "1.0.0-pre.1";
   postInstall = ''
