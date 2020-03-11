@@ -18,7 +18,7 @@ challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
   mkdir $out/include
   cp src/lib.h $out/include/
 
-  mkdir $out/lib/pkgconfig
+  mkdir -p $out/lib/pkgconfig
   cat > $out/lib/pkgconfig/${pname}.pc <<EOF
 prefix=$out
 exec_prefix=$out
