@@ -2,6 +2,9 @@
 # Ristretto implementation.
 { ristretto, git, python, pythonPackages, setuptools_scm, milksnake, cffi, attrs, testtools, hypothesis }:
 let
+  # Older nixpkgs have Rust crates with everything in the default output.
+  # Newer nixpkgs have Rust crates with a "lib" output and all of the good
+  # stuff is *there*.
   ristretto-lib = if ristretto ? lib then ristretto.lib else ristretto;
 in
 pythonPackages.buildPythonPackage rec {
