@@ -46,6 +46,18 @@ in
 challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
   pname = "libchallenge_bypass_ristretto";
   version = "1.0.0-pre.1";
+
+  # crate2nix generates expressions that want to use the local source files.
+  # Git submodules make everything more complicated though so I'd rather just
+  # always say we built from the canonical revision from Github.  Override the
+  # src defined in the generated expression to say that.
+  src = pkgs.fetchFromGitHub {
+    owner = "brave-intl";
+    repo = "challenge-bypass-ristretto-ffi";
+    rev = "f88d942ddfaf61a4a6703355a77c4ef71bc95c35";
+    sha256 = "1gf7ki3q6d15bq71z8s3pc5l2rsp1zk5bqviqlwq7czg674g7zw2";
+  };
+
   postInstall = ''
   # Newer nixpkgs give Rust crates a "lib" output where we need to put
   # everything.  Older nixpkgs have lib set to something else (the path to the
