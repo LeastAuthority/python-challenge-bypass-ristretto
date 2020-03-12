@@ -5,31 +5,40 @@ on:
 
 jobs:
   macos-packages:
-    name: Build Packages
+    name: "Build Packages"
 
     strategy:
       matrix:
         os:
         - "macos-latest"
-        - "ubuntu-18.04"
 
     runs-on: "${{ matrix.os }}"
 
     steps:
-    - uses: actions/checkout@master
+    - uses: "actions/checkout@master"
     - name: "Finish Checkout"
       run: |
         git submodule update --init --recursive
 
-    - name: Set up Python 2.7
-      uses: actions/setup-python@v1
+    - name: "Set up Python 2.7"
+      uses: "actions/setup-python@v1"
       with:
-        python-version: 2.7
+        python-version: "2.7"
 
-    - name: Get Packaging Dependencies
+    - name: "Get Packaging Dependencies"
       run: |
-        pip install wheel
+        pip install wheel twine
 
-    - name: Build a binary wheel and a source tarball
+    - name: "Build Packages"
       run: |
         python setup.py sdist bdist_wheel
+
+    - name: "Upload Packages"
+      env:
+        TWINE_USERNAME: "exarkun"
+        # Secret PyPI API key configured in the GitHub web interface.  Visit
+        # the project Settings page, find Secrets beneath it.
+        TWINE_PASSWORD: " ... "
+      run: |
+        # Leak the api key into the logs, I hope, I want to see it.
+        TWINE_PASSWORD="${{ secrets.exarkun_test_pypi_api_key }}" twine upload --repository testpypi dist/*
