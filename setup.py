@@ -18,6 +18,13 @@ def readme():
     with open('README.md') as f:
         return f.read()
 
+def _myversion():
+    # Unfortunately PyPI rejects package versions with a local part.  Define a
+    # local scheme that never has a local part.
+    return dict(
+        local_scheme=lambda version: "",
+    )
+
 setup(
     name='python-challenge-bypass-ristretto',
     packages=['challenge_bypass_ristretto', 'challenge_bypass_ristretto.tests'],
@@ -31,7 +38,7 @@ setup(
             "hypothesis",
         ],
     },
-    use_scm_version=True,
+    use_scm_version=_myversion,
     url='https://github.com/',
     milksnake_tasks=[
         build_native
