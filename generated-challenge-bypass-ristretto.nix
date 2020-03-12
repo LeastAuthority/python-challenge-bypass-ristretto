@@ -265,7 +265,13 @@ rec {
         crateName = "challenge-bypass-ristretto-ffi";
         version = "1.0.0-pre.1";
         edition = "2015";
-        src = (builtins.filterSource sourceFilter ./challenge-bypass-ristretto-ffi);type = [ "cdylib" "staticlib" ];
+        src = pkgs.fetchFromGitHub {
+          owner = "brave-intl";
+          repo = "challenge-bypass-ristretto-ffi";
+          rev = "f88d942ddfaf61a4a6703355a77c4ef71bc95c35";
+          sha256 = "1gf7ki3q6d15bq71z8s3pc5l2rsp1zk5bqviqlwq7czg674g7zw2";
+        };
+        type = [ "cdylib" "staticlib" ];
         authors = [
           "eV <ev@7pr.xyz>"
         ];
