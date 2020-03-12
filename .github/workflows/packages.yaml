@@ -4,20 +4,13 @@ on:
   push
 
 jobs:
-  packages:
+  macos-packages:
     name: Build Packages
 
     strategy:
       matrix:
         os:
-          - "ubuntu-18.04"
-          - "macos-10.15"
-
-        python-version:
-          - "2.7"
-          - "pypy2"
-          - "3.7"
-          - "pypy3"
+          - "macos-latest"
 
     runs-on: "${{ matrix.os }}"
 
@@ -31,6 +24,38 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 2.7
+
+    - name: Get Packaging Dependencies
+      run: |
+        pip install wheel
+
+    - name: Build a binary wheel and a source tarball
+      run: |
+        python setup.py sdist bdist_wheel
+
+    - name: Publish distribution to Test PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        # Secret PyPI API key configured in the GitHub web interface.  Visit
+        # the project Settings page, find Secrets beneath it.
+        password: ${{ secrets.exarkun_test_pypi_api_key }}
+        repository_url: https://test.pypi.org/legacy/
+
+  linux-packages:
+    name: Build Packages
+
+    strategy:
+      matrix:
+        os:
+          - "ubuntu-18.04"
+
+    runs-on: "${{ matrix.os }}"
+
+    steps:
+    - uses: actions/checkout@master
+    - name: "Finish Checkout"
+      run: |
+        git submodule update --init --recursive
 
     - name: Build a binary wheel and a source tarball
       uses: RalfG/python-wheels-manylinux-build@v0.2.2
