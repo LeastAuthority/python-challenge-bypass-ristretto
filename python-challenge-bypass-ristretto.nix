@@ -21,6 +21,7 @@ pythonPackages.buildPythonPackage rec {
   substituteInPlace $sourceRoot/setup.py \
       --replace "['cargo', 'build', '--release']" "['sh', '-c', ':']" \
       --replace "./challenge-bypass-ristretto-ffi" "/" \
+      --replace "_DYLIB_NAME = 'challenge_bypass_ristretto'" "_DYLIB_NAME = 'challenge_bypass_ristretto_ffi'" \
       --replace "target/release" "${ristretto-lib}/lib" \
       --replace "./src" "${ristretto.src}/src"
   '';

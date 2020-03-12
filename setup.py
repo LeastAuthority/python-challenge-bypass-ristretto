@@ -1,4 +1,7 @@
 from setuptools import setup
+
+_DYLIB_NAME = 'challenge_bypass_ristretto'
+
 def build_native(spec):
     # build rust library
     build = spec.add_external_build(
@@ -9,7 +12,7 @@ def build_native(spec):
         # The Python module name
         module_path='challenge_bypass_ristretto._native',
         # The C library being bound
-        dylib=lambda: build.find_dylib('challenge_bypass_ristretto_ffi', in_path='target/release'),
+        dylib=lambda: build.find_dylib(_DYLIB_NAME, in_path='target/release'),
         header_filename=lambda: build.find_header('lib.h', in_path='./src'),
         rtld_flags=['NOW', 'NODELETE']
     )
@@ -17,6 +20,13 @@ def build_native(spec):
 def readme():
     with open('README.md') as f:
         return f.read()
+
+def _myversion():
+    # Unfortunately PyPI rejects package versions with a local part.  Define a
+    # local scheme that never has a local part.
+    return dict(
+        local_scheme=lambda version: "",
+    )
 
 setup(
     name='python-challenge-bypass-ristretto',
@@ -31,7 +41,7 @@ setup(
             "hypothesis",
         ],
     },
-    use_scm_version=True,
+    use_scm_version=_myversion,
     url='https://github.com/',
     milksnake_tasks=[
         build_native
