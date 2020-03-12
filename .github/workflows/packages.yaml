@@ -40,7 +40,7 @@ jobs:
         # the project Settings page, find Secrets beneath it.
         TWINE_PASSWORD: "${{ secrets.exarkun_test_pypi_api_key }}"
       run: |
-        twine upload --repository testpypi dist/*
+        twine upload --verbose --repository testpypi dist/*
 
   linux-packages:
     name: Build Packages
