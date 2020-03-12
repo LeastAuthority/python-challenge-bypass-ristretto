@@ -13,7 +13,7 @@ jobs:
       # time of this comment.  We can bump it to a newer version when that
       # makes sense.  Meanwhile, the platform won't shift around beneath us
       # unexpectedly.
-      NIXPKGS_REV: "5d5cd70516001e79516d2ade8bcf31df208a4ef3"
+      NIXPKGS_REV: "353333ef340952c05332e3c271dff953264cb017"
 
     steps:
       - run:
@@ -67,8 +67,8 @@ jobs:
             # If nixpkgs changes then potentially a lot of cached packages for
             # the base system will be invalidated so we may as well drop them
             # and make a new cache with the new packages.
-            - privacypass-nix-store-v1-{{ checksum "nixpkgs.rev" }}
-            - privacypass-nix-store-v1-
+            - nix-store-v1-{{ checksum "nixpkgs.rev" }}
+            - nix-store-v1-
 
       - run:
           name: "Tests"
@@ -77,7 +77,7 @@ jobs:
 
       - save_cache:
           name: "Cache Nix Store Paths"
-          key: privacypass-nix-store-v1-{{ checksum "nixpkgs.rev" }}
+          key: nix-store-v1-{{ checksum "nixpkgs.rev" }}
           paths:
             - "/nix"
 

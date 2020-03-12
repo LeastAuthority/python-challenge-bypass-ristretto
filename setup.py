@@ -6,8 +6,10 @@ def build_native(spec):
         path='./challenge-bypass-ristretto-ffi'
     )
     spec.add_cffi_module(
-        module_path='privacypass._native',
-        dylib=lambda: build.find_dylib('challenge_bypass_ristretto', in_path='target/release'),
+        # The Python module name
+        module_path='challenge_bypass_ristretto._native',
+        # The C library being bound
+        dylib=lambda: build.find_dylib('challenge_bypass_ristretto_ffi', in_path='target/release'),
         header_filename=lambda: build.find_header('lib.h', in_path='./src'),
         rtld_flags=['NOW', 'NODELETE']
     )
@@ -17,8 +19,8 @@ def readme():
         return f.read()
 
 setup(
-    name='privacypass',
-    packages=['privacypass', 'privacypass.tests'],
+    name='python-challenge-bypass-ristretto',
+    packages=['challenge_bypass_ristretto', 'challenge_bypass_ristretto.tests'],
     zip_safe=False,
     platforms='any',
     setup_requires=['milksnake', 'setuptools_scm'],
@@ -37,7 +39,7 @@ setup(
     author='Ramakrishnan Muthukrishnan',
     author_email='ram@leastauthority.com',
     license = 'Mozilla Public License v2',
-    description='Privacypass library.',
+    description='Bindings for Brave\'s Ristretto-flavored Privacy Pass library.',
     long_description=readme(),
     long_description_content_type='text/markdown'
 )

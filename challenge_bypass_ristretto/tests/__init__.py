@@ -11,6 +11,6 @@ def _configure_hypothesis():
         max_examples=100000,
     )
 
-    profile_name = environ.get("PRIVACYPASS_HYPOTHESIS_PROFILE", "default")
+    profile_name = environ.get("CHALLENGE_BYPASS_RISTRETTO_HYPOTHESIS_PROFILE", "default")
     settings.load_profile(profile_name)
 _configure_hypothesis()

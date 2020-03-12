@@ -1,6 +1,6 @@
 import attr
 
-from privacypass._native import ffi, lib
+from ._native import ffi, lib
 
 def to_string(v):
     return ffi.string(v)
