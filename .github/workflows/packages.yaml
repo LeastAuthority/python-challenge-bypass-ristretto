@@ -40,6 +40,4 @@ jobs:
         # the project Settings page, find Secrets beneath it.
         TWINE_PASSWORD: "${{ secrets.exarkun_test_pypi_api_key }}"
       run: |
-        # Leak the api key into the logs, I hope, I want to see it.
-        echo $TWINE_PASSWORD
         twine upload --repository testpypi dist/*
