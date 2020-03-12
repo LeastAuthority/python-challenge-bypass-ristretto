@@ -1,0 +1,20 @@
+name: Build Python Packages
+
+on:
+  push
+
+jobs:
+  build:
+    name: Build Linux Wheel
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 2.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 2.7
+
+    - name: Build a binary wheel and a source tarball
+      run: >-
+        python setup.py sdist bdist_wheel
