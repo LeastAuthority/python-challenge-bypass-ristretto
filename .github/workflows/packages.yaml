@@ -35,10 +35,9 @@ jobs:
 
     - name: "Upload Packages"
       env:
-        TWINE_USERNAME: "exarkun"
+        TWINE_USERNAME: "__token__"
         # Secret PyPI API key configured in the GitHub web interface.  Visit
         # the project Settings page, find Secrets beneath it.
         TWINE_PASSWORD: "${{ secrets.exarkun_test_pypi_api_key }}"
       run: |
-        python -c 'import os; print(os.environ(["TWINE_PASSWORD"]))'
         twine upload --repository testpypi dist/*
