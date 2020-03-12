@@ -10,7 +10,8 @@ jobs:
     strategy:
       matrix:
         os:
-          - "macos-latest"
+        - "macos-latest"
+        - "ubuntu-18.04"
 
     runs-on: "${{ matrix.os }}"
 
@@ -27,46 +28,8 @@ jobs:
 
     - name: Get Packaging Dependencies
       run: |
-        pip install wheel twine
+        pip install wheel
 
     - name: Build a binary wheel and a source tarball
       run: |
         python setup.py sdist bdist_wheel
-
-    - name: Publish distribution to Test PyPI
-      env:
-        TWINE_USERNAME: "exarkun"
-        # Secret PyPI API key configured in the GitHub web interface.  Visit
-        # the project Settings page, find Secrets beneath it.
-        TWINE_PASSWORD: "${{ secrets.exarkun_test_pypi_api_key }}"
-      run: |
-        twine upload --verbose --repository testpypi dist/*
-
-  linux-packages:
-    name: Build Packages
-
-    strategy:
-      matrix:
-        os:
-          - "ubuntu-18.04"
-
-    runs-on: "${{ matrix.os }}"
-
-    steps:
-    - uses: actions/checkout@master
-    - name: "Finish Checkout"
-      run: |
-        git submodule update --init --recursive
-
-    - name: Build a binary wheel and a source tarball
-      uses: RalfG/python-wheels-manylinux-build@v0.2.2
-      with:
-        python-versions: 'cp27-cp27m cp27-cp27mu cp37-cp37m'
-
-    - name: Publish distribution to Test PyPI
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        # Secret PyPI API key configured in the GitHub web interface.  Visit
-        # the project Settings page, find Secrets beneath it.
-        password: ${{ secrets.exarkun_test_pypi_api_key }}
-        repository_url: https://test.pypi.org/legacy/
