@@ -4,9 +4,13 @@ on:
   push
 
 jobs:
-  build:
-    name: Build Linux Wheel
-    runs-on: ubuntu-18.04
+  packages:
+    name: Build Packages
+    strategy:
+      matrix:
+        os:
+          - "ubuntu-18.04"
+          - "macos-10.15"
 
     steps:
     - uses: actions/checkout@master
