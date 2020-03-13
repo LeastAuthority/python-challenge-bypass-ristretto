@@ -107,7 +107,7 @@ jobs:
       # Pending resolution to https://github.com/RalfG/python-wheels-manylinux-build/issues/11
       run: |
         mv setup.py setup.py.orig
-        echo 'exec open("/github/workspace/.github/workflows/manylinux2010-install-rust.py").read()' > setup.py
+        echo 'exec(open("/github/workspace/.github/workflows/manylinux2010-install-rust.py").read())' > setup.py
         cat setup.py.orig >> setup.py
 
     - name: "Build a binary wheel and a source tarball"
