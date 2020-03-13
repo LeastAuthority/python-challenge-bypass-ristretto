@@ -126,4 +126,4 @@ jobs:
         # the project Settings page, find Secrets beneath it.
         TWINE_PASSWORD: "${{ secrets.exarkun_test_pypi_api_key }}"
       run: |
-        twine upload --repository testpypi wheelhouse/*manylinux2010*.whl
+        python -m twine upload --repository testpypi wheelhouse/*manylinux2010*.whl
