@@ -45,9 +45,9 @@ name: Build Python Packages
 # Quoted key makes the yaml parser treat this as a string instead of a
 # presentation alias for `true`!
 "on":
-  release:
-    types:
-      - "created"
+  push:
+    tags:
+      - "v*"
 
 jobs:
   check-workflow:
