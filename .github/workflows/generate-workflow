@@ -20,6 +20,9 @@ def main():
     with open(template) as f:
         obj = yaml.safe_load(f)
 
+    # GitHub
+    del obj["anchors"]
+
     with open(generated, "w") as g:
         g.write(HEADER.format(
             now=datetime.datetime.now().isoformat(),

@@ -1,5 +1,44 @@
 # -*- yaml -*-
 
+# This is a convenient place to hang anchors on values.  The processor for the
+# template will delete this whole top-level key from the output so it does not
+# need to conform to the schema (though of course values it defines which are
+# referenced elsewhere still must).
+anchors:
+  steps:
+  - &CHECKOUT
+    uses: "actions/checkout@v2"
+    with:
+      # Fetch all history
+      fetch-depth: 0
+      submodules: "recursive"
+
+  - &FINISH_CHECKOUT
+    name: "Finish Checkout"
+    run: |
+      # We need tags to compute a version number.
+      git fetch --tags
+
+  - &GET_PACKAGE_DEPENDENCIES
+    name: "Get Packaging Dependencies"
+    run: |
+      pip install wheel twine
+
+  - &UPLOAD_PACKAGES
+    name: "Upload Packages"
+    env:
+      TWINE_USERNAME: "__token__"
+      # Secret PyPI API key configured in the GitHub web interface.  Visit
+      # the project Settings page, find Secrets beneath it.
+      TWINE_PASSWORD: "${{ secrets.exarkun_pypi_api_key }}"
+    run: |
+      twine upload --repository pypi dist/*
+
+  - &BDIST_WHEEL
+    name: "Build Packages"
+    run: |
+      python setup.py bdist_wheel
+
 name: Build Python Packages
 
 # Quoted key makes the yaml parser treat this as a string instead of a
@@ -8,43 +47,6 @@ name: Build Python Packages
   push
 
 jobs:
-  template:
-    runs-on: ""
-
-    steps:
-    - &CHECKOUT
-      uses: "actions/checkout@v2"
-      with:
-        # Fetch all history
-        fetch-depth: 0
-        submodules: "recursive"
-
-    - &FINISH_CHECKOUT
-      name: "Finish Checkout"
-      run: |
-        # We need tags to compute a version number.
-        git fetch --tags
-
-    - &GET_PACKAGE_DEPENDENCIES
-      name: "Get Packaging Dependencies"
-      run: |
-        pip install wheel twine
-
-    - &UPLOAD_PACKAGES
-      name: "Upload Packages"
-      env:
-        TWINE_USERNAME: "__token__"
-        # Secret PyPI API key configured in the GitHub web interface.  Visit
-        # the project Settings page, find Secrets beneath it.
-        TWINE_PASSWORD: "${{ secrets.exarkun_pypi_api_key }}"
-      run: |
-        twine upload --repository pypi dist/*
-
-    - &BDIST_WHEEL
-      name: "Build Packages"
-      run: |
-        python setup.py bdist_wheel
-
   macos-packages:
     name: "Build macOS Packages"
 
