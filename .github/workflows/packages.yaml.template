@@ -64,7 +64,7 @@ jobs:
     - name: "Check"
       run: |
         pip install pyyaml
-        if ! ./.github/workflows/generate-workflow ./.github/workflows/packages.yaml; then
+        if ./.github/workflows/generate-workflow ./.github/workflows/packages.yaml; then
           echo "Workflow configuration is not up to date with template!"
           exit 1
         fi
