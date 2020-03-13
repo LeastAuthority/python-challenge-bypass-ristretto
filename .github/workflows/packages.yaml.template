@@ -48,8 +48,33 @@ name: Build Python Packages
   push
 
 jobs:
+  check-workflow:
+    name: "Check Github Actions Workflow Configuration"
+
+    container:
+      image: "python:3.7-slim"
+
+    runs-on: "ubuntu-latest"
+
+    steps:
+    # A shallow checkout is okay for this job.
+    - name: "Checkout Source"
+      uses: "actions/checkout@v2"
+
+    - name: "Check"
+      run: |
+        ./.github/workflows/generate-workflow ./.github/workflows/packages.yaml
+        if git status --short | grep 'M .github/workflows/packages.yaml$'; then
+          echo "Generated changes to the workflow from the template!"
+          git diff
+          exit 1
+        fi
+
   macos-packages:
     name: "Build macOS Packages"
+
+    needs:
+      - "check-workflow"
 
     strategy:
       matrix:
@@ -69,6 +94,9 @@ jobs:
 
   windows-packages:
     name: "Build Windows Packages"
+
+    needs:
+      - "check-workflow"
 
     strategy:
       matrix:
@@ -90,6 +118,9 @@ jobs:
 
   manylinux2010-packages:
     name: "Build manylinux2010 Packages"
+
+    needs:
+      - "check-workflow"
 
     strategy:
       matrix:
