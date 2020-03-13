@@ -17,7 +17,7 @@ jobs:
     runs-on: "${{ matrix.os }}"
 
     steps:
-    - uses: "actions/checkout@master"
+    - uses: "actions/checkout@v2"
     - name: "Finish Checkout"
       run: |
         # We need history and tags to compute a version number.  GitHub
@@ -57,7 +57,7 @@ jobs:
     steps:
     # Avoid letting Windows newlines confusing milksnake.
     - run: "git config --global core.autocrlf false"
-    - uses: "actions/checkout@master"
+    - uses: "actions/checkout@v2"
     - name: "Finish Checkout"
       run: |
         # We need history and tags to compute a version number.  GitHub
@@ -95,7 +95,7 @@ jobs:
     runs-on: "${{ matrix.os }}"
 
     steps:
-    - uses: "actions/checkout@master"
+    - uses: "actions/checkout@v2"
     - name: "Finish Checkout"
       run: |
         # We need history and tags to compute a version number.  GitHub
