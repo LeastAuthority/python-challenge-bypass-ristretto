@@ -102,6 +102,14 @@ jobs:
         # checkout action doesn't give us either.
         git fetch --tags --unshallow
         git submodule update --init --recursive
+
+    - name: "Inject Rust Installer"
+      # Pending resolution to https://github.com/RalfG/python-wheels-manylinux-build/issues/11
+      run: |
+        mv setup.py setup.py.orig
+        echo 'exec open("/github/workspace/.github/workflows/manylinux2010-install-rust.py").read()' > setup.py
+        cat setup.py.orig >> setup.py
+
     - name: "Build a binary wheel and a source tarball"
       uses: "RalfG/python-wheels-manylinux-build@v0.2.2-manylinux2010_x86_64"
       with:
