@@ -7,7 +7,8 @@
 anchors:
   steps:
   - &CHECKOUT
-    uses: "actions/checkout@v2"
+    # Pick a revision of the checkout action that has the `submodules` input.
+    uses: "actions/checkout@9a3a9ade8222dcdf9d3c77710b10df47ee7c7c89"
     with:
       # Fetch all history
       fetch-depth: 0
