@@ -14,14 +14,22 @@ def main():
                 sys.argv[0],
             ),
         )
+
     name = sys.argv[1]
     template = name + ".template"
     generated = name + ".generated"
     with open(template) as f:
         obj = yaml.safe_load(f)
 
-    # GitHub
+    # GitHub gets angry if we have things that don't conform to their schema.
+    # Get rid of all this stuff now that it has served its purpose.
     del obj["anchors"]
+
+    with open(name) as f:
+        existing_obj = yaml.safe_load(f)
+
+    if obj == existing_obj:
+        raise SystemExit("Generated file already up-to-date.")
 
     with open(generated, "w") as g:
         g.write(HEADER.format(
