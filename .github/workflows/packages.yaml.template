@@ -135,7 +135,8 @@ jobs:
     steps:
     - *CHECKOUT
     - *FINISH_CHECKOUT
-
+    # wheel isn't required but twine is
+    - *GET_PACKAGE_DEPENDENCIES
     - name: "Inject Rust Installer"
       # Pending resolution to https://github.com/RalfG/python-wheels-manylinux-build/issues/11
       run: |
