@@ -119,6 +119,6 @@ jobs:
     - name: "Put packages where they can be found"
       run: |
         mkdir -p dist
-        mv wheelhouse/*manylinux2010*.whl dist/
+        cp wheelhouse/*manylinux2010*.whl dist/
 
     - *UPLOAD_PACKAGES
