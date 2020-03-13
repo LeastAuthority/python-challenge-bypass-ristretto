@@ -41,3 +41,41 @@ jobs:
         TWINE_PASSWORD: "${{ secrets.exarkun_test_pypi_api_key }}"
       run: |
         twine upload --repository testpypi dist/*
+
+  windows-packages:
+    name: "Build Windows Packages"
+
+    strategy:
+      matrix:
+        os:
+        - "windows-latest"
+        python-version:
+        - "pypy3"
+
+    runs-on: "${{ matrix.os }}"
+
+    steps:
+    - uses: "actions/checkout@master"
+    - name: "Finish Checkout"
+      run: |
+        # We need history and tags to compute a version number.  GitHub
+        # checkout action doesn't give us either.
+        git fetch --tags --unshallow
+        git submodule update --init --recursive
+
+    - name: "Get Packaging Dependencies"
+      run: |
+        pip install wheel twine
+
+    - name: "Build Packages"
+      run: |
+        python setup.py sdist bdist_wheel
+
+    - name: "Upload Packages"
+      env:
+        TWINE_USERNAME: "__token__"
+        # Secret PyPI API key configured in the GitHub web interface.  Visit
+        # the project Settings page, find Secrets beneath it.
+        TWINE_PASSWORD: "${{ secrets.exarkun_test_pypi_api_key }}"
+      run: |
+        twine upload --repository testpypi dist/*
