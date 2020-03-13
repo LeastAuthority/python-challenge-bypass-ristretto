@@ -12,9 +12,6 @@ jobs:
         os:
         - "macos-latest"
         python-version:
-        - "py27"
-        - "pypy2"
-        - "py37"
         - "pypy3"
 
     runs-on: "${{ matrix.os }}"
