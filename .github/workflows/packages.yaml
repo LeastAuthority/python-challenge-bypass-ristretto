@@ -23,6 +23,9 @@ jobs:
     - uses: "actions/checkout@master"
     - name: "Finish Checkout"
       run: |
+        # We need history and tags to compute a version number.  GitHub
+        # checkout action doesn't give us either.
+        git fetch --tags --unshallow
         git submodule update --init --recursive
 
     - name: "Get Packaging Dependencies"
