@@ -33,7 +33,7 @@ anchors:
       # the project Settings page, find Secrets beneath it.
       TWINE_PASSWORD: "${{ secrets.exarkun_pypi_api_key }}"
     run: |
-      twine upload --repository pypi dist/*
+      python -m twine upload --repository pypi dist/*
 
   - &BDIST_WHEEL
     name: "Build Packages"
