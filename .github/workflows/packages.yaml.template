@@ -118,6 +118,8 @@ jobs:
     - *UPLOAD_PACKAGES
 
   manylinux2010-packages:
+    # Build manylinux2010 packages because the tooling for building
+    # manylinux2014 packages does not support Python 2.7.
     name: "Build manylinux2010 Packages"
 
     needs:
