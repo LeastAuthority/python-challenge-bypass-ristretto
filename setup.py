@@ -22,9 +22,9 @@ def readme():
         return f.read()
 
 def _myversion():
-    # Unfortunately PyPI rejects package versions with a local part.  Define a
-    # local scheme that never has a local part.
     return dict(
+        # Unfortunately PyPI rejects package versions with a local part.
+        # Define a local scheme that never has a local part.
         local_scheme=lambda version: "",
     )
 
@@ -42,7 +42,7 @@ setup(
         ],
     },
     use_scm_version=_myversion,
-    url='https://github.com/',
+    url='https://github.com/LeastAuthority/python-challenge-bypass-ristretto',
     milksnake_tasks=[
         build_native
     ],

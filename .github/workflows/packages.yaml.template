@@ -1,0 +1,153 @@
+# -*- yaml -*-
+
+# This is a convenient place to hang anchors on values.  The processor for the
+# template will delete this whole top-level key from the output so it does not
+# need to conform to the schema (though of course values it defines which are
+# referenced elsewhere still must).
+anchors:
+  steps:
+  - &CHECKOUT
+    # Pick a revision of the checkout action that has the `submodules` input.
+    uses: "actions/checkout@9a3a9ade8222dcdf9d3c77710b10df47ee7c7c89"
+    with:
+      # Fetch all history
+      fetch-depth: 0
+      submodules: "recursive"
+
+  - &FINISH_CHECKOUT
+    name: "Finish Checkout"
+    run: |
+      # We need tags to compute a version number.
+      git fetch --tags
+
+  - &GET_PACKAGE_DEPENDENCIES
+    name: "Get Packaging Dependencies"
+    run: |
+      pip install wheel twine
+
+  - &UPLOAD_PACKAGES
+    name: "Upload Packages"
+    env:
+      TWINE_USERNAME: "__token__"
+      # Secret PyPI API key configured in the GitHub web interface.  Visit
+      # the project Settings page, find Secrets beneath it.
+      TWINE_PASSWORD: "${{ secrets.exarkun_pypi_api_key }}"
+    run: |
+      python -m twine upload --repository pypi dist/*
+
+  - &BDIST_WHEEL
+    name: "Build Packages"
+    run: |
+      python setup.py bdist_wheel
+
+name: Build Python Packages
+
+# Quoted key makes the yaml parser treat this as a string instead of a
+# presentation alias for `true`!
+"on":
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  check-workflow:
+    name: "Check Github Actions Workflow Configuration"
+
+    container:
+      image: "python:3.7-slim"
+
+    runs-on: "ubuntu-latest"
+
+    steps:
+    # A shallow checkout is okay for this job.
+    - name: "Checkout Source"
+      uses: "actions/checkout@v2"
+
+    - name: "Check"
+      run: |
+        pip install pyyaml
+        if ./.github/workflows/generate-workflow ./.github/workflows/packages.yaml; then
+          echo "Workflow configuration is not up to date with template!"
+          exit 1
+        fi
+
+  macos-packages:
+    name: "Build macOS Packages"
+
+    needs:
+      - "check-workflow"
+
+    strategy:
+      matrix:
+        os:
+        - "macos-latest"
+        python-version:
+        - "pypy3"
+
+    runs-on: "${{ matrix.os }}"
+
+    steps:
+    - *CHECKOUT
+    - *FINISH_CHECKOUT
+    - *GET_PACKAGE_DEPENDENCIES
+    - *BDIST_WHEEL
+    - *UPLOAD_PACKAGES
+
+  windows-packages:
+    name: "Build Windows Packages"
+
+    needs:
+      - "check-workflow"
+
+    strategy:
+      matrix:
+        os:
+        - "windows-latest"
+        python-version:
+        - "pypy3"
+
+    runs-on: "${{ matrix.os }}"
+
+    steps:
+    # Avoid letting Windows newlines confusing milksnake.
+    - run: "git config --global core.autocrlf false"
+    - *CHECKOUT
+    - *FINISH_CHECKOUT
+    - *GET_PACKAGE_DEPENDENCIES
+    - *BDIST_WHEEL
+    - *UPLOAD_PACKAGES
+
+  manylinux2010-packages:
+    # Build manylinux2010 packages because the tooling for building
+    # manylinux2014 packages does not support Python 2.7.
+    name: "Build manylinux2010 Packages"
+
+    needs:
+    - "check-workflow"
+
+    strategy:
+      matrix:
+        os:
+        - "ubuntu-18.04"
+        python-version:
+        - "pypy3"
+
+    runs-on: "${{ matrix.os }}"
+
+    steps:
+    - *CHECKOUT
+    - *FINISH_CHECKOUT
+    # wheel isn't required but twine is
+    - *GET_PACKAGE_DEPENDENCIES
+    - name: "Build a binary wheel and a source tarball"
+      uses: "LeastAuthority/python-wheels-manylinux-build@master"
+      with:
+        python-versions: "cp37-cp37m"
+        install-extra-requirements: ".github/workflows/install-rust.sh"
+
+    - name: "Put packages where they can be found"
+      run: |
+        mkdir -p dist
+        cp wheelhouse/*manylinux2010*.whl dist/
+
+    - *UPLOAD_PACKAGES
