@@ -123,11 +123,7 @@ jobs:
     needs:
     - "check-workflow"
 
-    strategy:
-      matrix:
-        os: "ubuntu-latest"
-
-    runs-on: "${{ matrix.os }}"
+    runs-on: "ubuntu-latest"
 
     steps:
     - *CHECKOUT
