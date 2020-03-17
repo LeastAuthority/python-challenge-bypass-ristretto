@@ -139,8 +139,14 @@ jobs:
         python -m pip install cibuildwheel==1.3.0
 
     - name: "Build wheel"
+      env:
+        CIBW_BEFORE_BUILD: |
+          curl --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/rustup-init
+          sh /tmp/rustup-init -y --default-host x86_64-unknown-linux-gnu --default-toolchain stable
+          rm /tmp/rustup-init
+
       run: |
-        python -m cibuildwheel --output-dir dist
+        PATH=$PATH:/github/home/.cargo/bin python -m cibuildwheel --output-dir dist
 
     - *UPLOAD_PACKAGES
 
