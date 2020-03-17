@@ -42,7 +42,7 @@ setup(
         ],
     },
     use_scm_version=_myversion,
-    url='https://github.com/',
+    url='https://github.com/LeastAuthority/python-challenge-bypass-ristretto',
     milksnake_tasks=[
         build_native
     ],
