@@ -170,17 +170,11 @@ jobs:
     - *FINISH_CHECKOUT
     # wheel isn't required but twine is
     - *GET_PACKAGE_DEPENDENCIES
-    - name: "Inject Rust Installer"
-      # Pending resolution to https://github.com/RalfG/python-wheels-manylinux-build/issues/11
-      run: |
-        mv setup.py setup.py.orig
-        echo 'exec(open("/github/workspace/.github/workflows/manylinux2010-install-rust.py").read())' > setup.py
-        cat setup.py.orig >> setup.py
-
     - name: "Build a binary wheel and a source tarball"
-      uses: "RalfG/python-wheels-manylinux-build@v0.2.2-manylinux2010_x86_64"
+      uses: "LeastAuthority/python-wheels-manylinux-build@master"
       with:
         python-versions: "cp37-cp37m"
+        install-extra-requirements: ".github/workflows/install-rust.sh"
 
     - name: "Put packages where they can be found"
       run: |
