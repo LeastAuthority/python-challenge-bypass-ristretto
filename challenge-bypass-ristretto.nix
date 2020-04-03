@@ -88,7 +88,7 @@ Description: Ristretto-Flavored PrivacyPass library
 Version: ${version}
 
 Requires:
-Libs: -L$lib -lchallenge_bypass_ristretto
+Libs: -L$lib -lchallenge_bypass_ristretto_ffi
 Cflags: -I$lib/include
 EOF
   '';
