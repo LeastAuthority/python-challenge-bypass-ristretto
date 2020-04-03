@@ -44,8 +44,11 @@ let
   };
 in
 challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
-  pname = "libchallenge_bypass_ristretto";
-  version = "1.0.0-pre.1";
+  pname = "libchallenge_bypass_ristretto_ffi";
+  # Version constrained by
+  # https://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Version.html
+  # until you upgrade to Cabal 3.0.0.
+  version = "1.0.0-pre1";
 
   # crate2nix generates expressions that want to use the local source files.
   # Git submodules make everything more complicated though so I'd rather just
