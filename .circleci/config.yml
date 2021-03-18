@@ -1,6 +1,25 @@
 version: 2
 
 jobs:
+  package-macos-10.14:
+    macos:
+      xcode: "11.1.0"
+
+    steps:
+      - "checkout"
+      - run:
+          # And the rest of it.
+          name: "Finish checking out source"
+          command: |
+            git submodule init
+            git submodule update
+      - run:
+          name: "Hacky do it"
+          command: |
+            git fetch --tags
+            pip install wheel twine
+            python setup.py bdist_wheel
+
   tests:
     docker:
       # Run in a highly Nix-capable environment.
