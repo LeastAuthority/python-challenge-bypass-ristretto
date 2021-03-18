@@ -44,6 +44,7 @@ jobs:
 
       - run:
           name: "Get Python Build/Package Dependencies"
+          command: |
             # Make sure we have a pip that's aware of Python version constraints
             pip install --upgrade pip
             # Pre-install these two setup_depends using pip so we don't have
