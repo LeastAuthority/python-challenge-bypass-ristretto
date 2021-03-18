@@ -105,3 +105,4 @@ workflows:
   all-tests:
     jobs:
       - "tests"
+      - "package-macos-10.14"
