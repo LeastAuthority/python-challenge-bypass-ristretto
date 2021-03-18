@@ -7,7 +7,7 @@ jobs:
         type: "string"
 
     macos:
-      xcode: "<< xcode-version >>"
+      xcode: "<< parameters.xcode-version >>"
 
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
