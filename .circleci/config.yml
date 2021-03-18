@@ -16,6 +16,7 @@ jobs:
       - run:
           name: "Hacky do it"
           command: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
             pip install --upgrade pip
             pip install --upgrade setuptools_scm
             git fetch --tags
