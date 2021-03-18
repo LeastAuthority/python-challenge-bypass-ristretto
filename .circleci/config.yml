@@ -1,9 +1,9 @@
 version: 2
 
 jobs:
-  package-macos-10.14:
+  package-macos:
     macos:
-      xcode: "11.1.0"
+      xcode: "<< xcode-version >>"
 
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
@@ -160,6 +160,14 @@ workflows:
     jobs:
       - "tests"
       - "package-macos-10.14":
+          matrix:
+            parameters:
+              # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
+              xcode-version:
+                # Latest macOS 10.14
+                - "11.1.0"
+                # Latest macOS 10.15
+                - "12.4.0"
           filters:
             # CircleCI does not run workflows for tags unless you explicitly
             # specify tag filters. Additionally, if a job requires any other
