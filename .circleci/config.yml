@@ -16,6 +16,7 @@ jobs:
       - run:
           name: "Hacky do it"
           command: |
+            pip install --upgrade pip
             git fetch --tags
             pip install wheel twine
             python setup.py bdist_wheel
