@@ -4,8 +4,9 @@ _DYLIB_NAME = 'challenge_bypass_ristretto'
 
 def build_native(spec):
     # build rust library
+    cargo_build = ['cargo', 'build', '--release']
     build = spec.add_external_build(
-        cmd=['cargo', 'build', '--release'],
+        cmd=['sh', '-c', 'echo "Running cargo build..."; {}'.format(" ".join(cargo_build))],
         path='./challenge-bypass-ristretto-ffi'
     )
     spec.add_cffi_module(

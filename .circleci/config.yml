@@ -1,6 +1,83 @@
-version: 2
+version: 2.1
 
 jobs:
+  package-macos:
+    parameters:
+      xcode-version:
+        type: "string"
+
+    macos:
+      xcode: "<< parameters.xcode-version >>"
+
+    environment:
+      # PyPI authentication configuration for twine so we can upload packages.
+      # TWINE_PASSWORD is set in the CircleCI private configuration section.
+      # In the CircleCI web app:
+      #
+      #    Project Settings ->
+      #    Environment Variables ->
+      #    Add Environment Variable ->
+      #    Name: TWINE_PASSWORD
+      #    Value: <a token issued by PyPI>
+      #
+      # The PyPI token is issued in the PyPI web app:
+      #
+      #    Manage ->
+      #    Settings ->
+      #    Create a token for ... ->
+      #    Permissions: Upload
+      #    Scope: Project: python-challenge-bypass-ristretto
+      TWINE_USERNAME: "__token__"
+
+    steps:
+      - "checkout"
+      - run:
+          # And the rest of it.
+          name: "Finish checking out source"
+          command: |
+            git submodule init
+            git submodule update
+            git fetch --tags
+
+      - run:
+          name: "Install Rust Build Toolchain"
+          command: |
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/rustup-init
+            sh /tmp/rustup-init -y --default-toolchain stable
+            . "$HOME"/.cargo/env
+
+      - run:
+          name: "Get Python Build/Package Dependencies"
+          command: |
+            # Make sure we have a pip that's aware of Python version constraints
+            pip install --upgrade pip
+            # Pre-install these two setup_depends using pip so we don't have
+            # to rely on whatever resolution logic setuptools would apply.
+            pip install --upgrade milksnake setuptools_scm
+            # And get these so we can build and then upload a wheel
+            pip install wheel twine
+
+      - run:
+          name: "Build Wheel"
+          command: |
+            python setup.py bdist_wheel
+
+      - run:
+          name: "Upload Wheel"
+          command: |
+            if [[ "$CIRCLE_TAG" == v* ]]; then
+              # We're building a release tag so we should probably really
+              # release it!
+              repo="pypi"
+            else
+              # We're building anything else.  Exercise as much of the release
+              # code as possible - but send it to the "test" package index,
+              # not the "real" one.
+              repo="testpypi"
+              TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
+            fi
+            python -m twine upload --repository $repo dist/*
+
   tests:
     docker:
       # Run in a highly Nix-capable environment.
@@ -86,3 +163,24 @@ workflows:
   all-tests:
     jobs:
       - "tests"
+      - "package-macos":
+          matrix:
+            parameters:
+              # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
+              xcode-version:
+                # Latest macOS 10.14
+                - "11.1.0"
+                # The newest macOS 10.15 that still has Python 2. :/
+                - "11.4.1"
+          filters:
+            # CircleCI does not run workflows for tags unless you explicitly
+            # specify tag filters. Additionally, if a job requires any other
+            # jobs (directly or indirectly), you must specify tag filters for
+            # those jobs.
+            # https://circleci.com/docs/2.0/configuration-reference/?section=configuration#tags
+            branches:
+              # Keep running on all branches
+              only: "/.*/"
+            tags:
+              # Run on all release tags too
+              only: "/v.*/"
