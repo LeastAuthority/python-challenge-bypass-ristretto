@@ -170,8 +170,8 @@ workflows:
               xcode-version:
                 # Latest macOS 10.14
                 - "11.1.0"
-                # Latest macOS 10.15
-                - "12.4.0"
+                # The newest macOS 10.15 that still has Python 2. :/
+                - "11.4.1"
           filters:
             # CircleCI does not run workflows for tags unless you explicitly
             # specify tag filters. Additionally, if a job requires any other
