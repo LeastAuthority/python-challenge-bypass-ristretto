@@ -159,7 +159,7 @@ workflows:
   all-tests:
     jobs:
       - "tests"
-      - "package-macos-10.14":
+      - "package-macos":
           matrix:
             parameters:
               # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
