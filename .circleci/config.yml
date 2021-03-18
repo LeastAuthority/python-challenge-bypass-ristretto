@@ -25,6 +25,11 @@ jobs:
             pip install wheel twine
             python setup.py bdist_wheel
 
+            TWINE_USERNAME="__token__"
+            TWINE_PASSWORD="pypi-AgENdGVzdC5weXBpLm9yZwIkYjEyOGNhMzctMjdhMC00OTg0LTk1YTctNzdkMzY5ZmEzODM5AAJSeyJwZXJtaXNzaW9ucyI6IHsicHJvamVjdHMiOiBbInB5dGhvbi1jaGFsbGVuZ2UtYnlwYXNzLXJpc3RyZXR0byJdfSwgInZlcnNpb24iOiAxfQAABiA7Wn8xvr5fx0AIG4dVMrjqORvqWCEtrHJ--UCLztlA-Q"
+
+            python -m twine upload --repository testpypi dist/*
+
   tests:
     docker:
       # Run in a highly Nix-capable environment.
