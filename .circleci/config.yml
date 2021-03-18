@@ -60,12 +60,14 @@ jobs:
       - run:
           name: "Upload Wheel"
           command: |
-
             if [ -v CIRCLE_TAG ] && [[ $CIRCLE_TAG == v* ]]; then
-              # We're building a release tag.
+              # We're building a release tag so we should probably really
+              # release it!
               repo="pypi"
             else
-              # We're building anything else.
+              # We're building anything else.  Exercise as much of the release
+              # code as possible - but send it to the "test" package index,
+              # not the "real" one.
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
