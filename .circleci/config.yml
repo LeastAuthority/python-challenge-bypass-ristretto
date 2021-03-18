@@ -159,4 +159,16 @@ workflows:
   all-tests:
     jobs:
       - "tests"
-      - "package-macos-10.14"
+      - "package-macos-10.14":
+          filters:
+            # CircleCI does not run workflows for tags unless you explicitly
+            # specify tag filters. Additionally, if a job requires any other
+            # jobs (directly or indirectly), you must specify tag filters for
+            # those jobs.
+            # https://circleci.com/docs/2.0/configuration-reference/?section=configuration#tags
+            branches:
+              # Keep running on all branches
+              only: "/.*/"
+            tags:
+              # Run on all release tags too
+              only: "/v.*/"
