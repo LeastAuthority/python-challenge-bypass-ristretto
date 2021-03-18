@@ -4,6 +4,7 @@ _DYLIB_NAME = 'challenge_bypass_ristretto'
 
 def build_native(spec):
     # build rust library
+    print("Running `cargo build --release`")
     build = spec.add_external_build(
         cmd=['cargo', 'build', '--release'],
         path='./challenge-bypass-ristretto-ffi'
