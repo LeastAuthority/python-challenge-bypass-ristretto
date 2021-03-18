@@ -71,28 +71,6 @@ jobs:
           exit 1
         fi
 
-  macos-packages:
-    name: "Build macOS Packages"
-
-    needs:
-      - "check-workflow"
-
-    strategy:
-      matrix:
-        os:
-        - "macos-latest"
-        python-version:
-        - "pypy3"
-
-    runs-on: "${{ matrix.os }}"
-
-    steps:
-    - *CHECKOUT
-    - *FINISH_CHECKOUT
-    - *GET_PACKAGE_DEPENDENCIES
-    - *BDIST_WHEEL
-    - *UPLOAD_PACKAGES
-
   windows-packages:
     name: "Build Windows Packages"
 
