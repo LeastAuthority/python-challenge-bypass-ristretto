@@ -5,6 +5,26 @@ jobs:
     macos:
       xcode: "11.1.0"
 
+    environment:
+      # PyPI authentication configuration for twine so we can upload packages.
+      # TWINE_PASSWORD is set in the CircleCI private configuration section.
+      # In the CircleCI web app:
+      #
+      #    Project Settings ->
+      #    Environment Variables ->
+      #    Add Environment Variable ->
+      #    Name: TWINE_PASSWORD
+      #    Value: <a token issued by PyPI>
+      #
+      # The PyPI token is issued in the PyPI web app:
+      #
+      #    Manage ->
+      #    Settings ->
+      #    Create a token for ... ->
+      #    Permissions: Upload
+      #    Scope: Project: python-challenge-bypass-ristretto
+      TWINE_USERNAME: "__token__"
+
     steps:
       - "checkout"
       - run:
@@ -13,22 +33,43 @@ jobs:
           command: |
             git submodule init
             git submodule update
+            git fetch --tags
+
       - run:
-          name: "Hacky do it"
+          name: "Install Rust Build Toolchain"
           command: |
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/rustup-init
             sh /tmp/rustup-init -y --default-toolchain stable
             . "$HOME"/.cargo/env
+
+      - run:
+          name: "Get Python Build/Package Dependencies"
+            # Make sure we have a pip that's aware of Python version constraints
             pip install --upgrade pip
-            pip install --upgrade setuptools_scm
-            git fetch --tags
+            # Pre-install these two setup_depends using pip so we don't have
+            # to rely on whatever resolution logic setuptools would apply.
+            pip install --upgrade milksnake setuptools_scm
+            # And get these so we can build and then upload a wheel
             pip install wheel twine
+
+      - run:
+          name: "Build Wheel"
+          command: |
             python setup.py bdist_wheel
 
-            export TWINE_USERNAME="__token__"
-            export TWINE_PASSWORD="pypi-AgENdGVzdC5weXBpLm9yZwIkYjEyOGNhMzctMjdhMC00OTg0LTk1YTctNzdkMzY5ZmEzODM5AAJSeyJwZXJtaXNzaW9ucyI6IHsicHJvamVjdHMiOiBbInB5dGhvbi1jaGFsbGVuZ2UtYnlwYXNzLXJpc3RyZXR0byJdfSwgInZlcnNpb24iOiAxfQAABiA7Wn8xvr5fx0AIG4dVMrjqORvqWCEtrHJ--UCLztlA-Q"
+      - run:
+          name: "Upload Wheel"
+          command: |
 
-            python -m twine upload --repository testpypi dist/*
+            if [ -v CIRCLE_TAG ] && [[ $CIRCLE_TAG == v* ]]; then
+              # We're building a release tag.
+              repo="pypi"
+            else
+              # We're building anything else.
+              repo="testpypi"
+              TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
+            fi
+            python -m twine upload --repository $repo
 
   tests:
     docker:
