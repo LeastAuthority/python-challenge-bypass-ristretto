@@ -2,6 +2,10 @@ version: 2.1
 
 jobs:
   package-macos:
+    parameters:
+      xcode-version:
+        type: "string"
+
     macos:
       xcode: "<< xcode-version >>"
 
