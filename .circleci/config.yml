@@ -61,7 +61,7 @@ jobs:
       - run:
           name: "Upload Wheel"
           command: |
-            if [ -v CIRCLE_TAG ] && [[ $CIRCLE_TAG == v* ]]; then
+            if [[ "$CIRCLE_TAG" == v* ]]; then
               # We're building a release tag so we should probably really
               # release it!
               repo="pypi"
