@@ -72,7 +72,7 @@ jobs:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
-            python -m twine upload --repository $repo
+            python -m twine upload --repository $repo dist/*
 
   tests:
     docker:
