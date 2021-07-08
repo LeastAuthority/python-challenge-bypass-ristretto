@@ -161,7 +161,7 @@ jobs:
   tests-2009:
     <<: *TESTS
     environment:
-      NIXPKGS_REV: "nixos-20.09"
+      NIXPKGS_REV: "20.09"
 
 workflows:
   version: 2
