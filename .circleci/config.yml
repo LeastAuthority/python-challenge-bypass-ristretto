@@ -101,7 +101,7 @@ jobs:
           # the `BASE_ENV` feature as we do here.
           name: "Setup NIX_PATH Environment Variable"
           command: |
-            echo "export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/$NIXPKGS_REV.tar.gz" >> $BASH_ENV
+            echo "export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/$NIXPKGS_REV.tar.gz" >> $BASH_ENV
 
       # Get *our* source code.
       - "checkout"
