@@ -163,12 +163,18 @@ jobs:
     environment:
       NIXPKGS_REV: "20.09"
 
+  tests-2105:
+    <<: *TESTS
+    environment:
+      NIXPKGS_REV: "21.05"
+
 workflows:
   version: 2
   all-tests:
     jobs:
       - "tests-353333"
       - "tests-2009"
+      - "tests-2105"
       - "package-macos":
           matrix:
             parameters:
