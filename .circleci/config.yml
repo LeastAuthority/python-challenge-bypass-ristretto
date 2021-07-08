@@ -154,14 +154,24 @@ jobs:
             - "/nix"
 
       - run:
-          name: "Tests"
+          name: "Build"
           command: |
-            nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'
+            nix-build \
+              --arg pkgs 'import <nixpkgs> {}' \
+              --arg stdenv '(import <nixpkgs> {}).stdenv' \
+              --arg darwin false \
+              challenge-bypass-ristretto.nix
 
       - run:
           name: "Check pkg-config"
           command: |
             nix-shell -p ./result pkg-config --run 'pkg-config --exists libchallenge_bypass_ristretto_ffi'
+
+      - run:
+          name: "Tests"
+          command: |
+            nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'
+
 
   tests-2009:
     <<: *TESTS
