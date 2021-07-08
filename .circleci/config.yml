@@ -78,7 +78,7 @@ jobs:
             fi
             python -m twine upload --repository $repo dist/*
 
-  tests:
+  tests-353333: &TESTS
     docker:
       # Run in a highly Nix-capable environment.
       - image: "nixorg/nix:circleci"
@@ -157,6 +157,11 @@ jobs:
           key: nix-store-v1-{{ checksum "nixpkgs.rev" }}
           paths:
             - "/nix"
+
+  tests-2009:
+    <<: *TESTS
+    environment:
+      NIXPKGS_REV: "nixos-20.09"
 
 workflows:
   version: 2
