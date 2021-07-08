@@ -167,7 +167,8 @@ workflows:
   version: 2
   all-tests:
     jobs:
-      - "tests"
+      - "tests-353333"
+      - "tests-2009"
       - "package-macos":
           matrix:
             parameters:
