@@ -156,11 +156,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            nix-build \
-              --arg pkgs 'import <nixpkgs> {}' \
-              --arg stdenv '(import <nixpkgs> {}).stdenv' \
-              --arg darwin false \
-              challenge-bypass-ristretto.nix
+            nix-build default-challenge-bypass-ristretto.nix
 
       - run:
           name: "Check pkg-config"
