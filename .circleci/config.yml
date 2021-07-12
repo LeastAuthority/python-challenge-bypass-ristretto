@@ -173,6 +173,11 @@ jobs:
             nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'
 
 
+  tests-1909:
+    <<: *TESTS
+    environment:
+      NIXPKGS_REV: "19.09"
+
   tests-2009:
     <<: *TESTS
     environment:
@@ -188,6 +193,7 @@ workflows:
   all-tests:
     jobs:
       - "tests-353333"
+      - "tests-1909"
       - "tests-2009"
       - "tests-2105"
       - "package-macos":
