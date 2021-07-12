@@ -1,7 +1,7 @@
-{ pkgs, stdenv, darwin }:
+{ pkgs, stdenv, lib, darwin }:
 let
   withSecurity = attrs: {
-    buildInputs = stdenv.lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
+    buildInputs = lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
   };
   defaultCrateOverrides = pkgs.defaultCrateOverrides // {
     curve25519-dalek = withSecurity;
@@ -48,7 +48,7 @@ challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
   # Version constrained by
   # https://hackage.haskell.org/package/base-4.12.0.0/docs/Data-Version.html
   # until you upgrade to Cabal 3.0.0.
-  version = "1.0.0-pre1";
+  version = "1.0.0-pre3";
 
   # crate2nix generates expressions that want to use the local source files.
   # Git submodules make everything more complicated though so I'd rather just
@@ -62,21 +62,13 @@ challenge-bypass-ristretto.rootCrate.build.overrideAttrs (old: rec {
   };
 
   postInstall = ''
-  # Newer nixpkgs give Rust crates a "lib" output where we need to put
-  # everything.  Older nixpkgs have lib set to something else (the path to the
-  # .so, it seems) and only have the "out" output and things need to go there.
-  if [ ! -d $lib ]; then
-    lib=$out/lib
-  fi
-
-  # Expose the header file and pkg-config so other bindings can be built
-  # against this one. It might be better to have a separate dev output but I
-  # don't know how to do that.
-  mkdir $lib/include
+  # Provide the ffi header file things can be compiled against the library.
+  mkdir -p $lib/include
   cp src/lib.h $lib/include/
 
-  mkdir $lib/pkgconfig
-  cat > $lib/pkgconfig/${pname}.pc <<EOF
+  # Provide a pkgconfig file so build systems can find the header and library.
+  mkdir -p $lib/lib/pkgconfig
+  cat > $lib/lib/pkgconfig/${pname}.pc <<EOF
 prefix=$lib
 exec_prefix=$lib
 libdir=$lib
