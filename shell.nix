@@ -2,7 +2,7 @@
 let
   pythonPackages = pkgs.python27Packages;
   python = pkgs.python27;
-  ristretto = pkgs.callPackage ./challenge-bypass-ristretto.nix { };
+  ristretto = pkgs.callPackage ./default-challenge-bypass-ristretto-ffi.nix { };
   challenge-bypass-ristretto = pythonPackages.callPackage ./python-challenge-bypass-ristretto.nix {
     inherit ristretto;
   };
