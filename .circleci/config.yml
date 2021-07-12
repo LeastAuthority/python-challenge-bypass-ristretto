@@ -156,7 +156,7 @@ jobs:
       - run:
           name: "Build"
           command: |
-            nix-build default-challenge-bypass-ristretto.nix
+            nix-build default-challenge-bypass-ristretto-ffi.nix
 
       - run:
           name: "Check pkg-config"
