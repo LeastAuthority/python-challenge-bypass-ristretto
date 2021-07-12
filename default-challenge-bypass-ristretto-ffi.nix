@@ -14,5 +14,5 @@ let
     sha256 = "1ckzhh24mgz6jd1xhfgx0i9mijk6xjqxwsshnvq789xsavrmsc36";
   };
 in
-{ pkgs ? import nixpkgs }:
+{ pkgs ? import nixpkgs { } }:
 pkgs.callPackage ./challenge-bypass-ristretto.nix { }
