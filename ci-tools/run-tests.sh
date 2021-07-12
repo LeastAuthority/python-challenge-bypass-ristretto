@@ -15,7 +15,7 @@ fi
 
 # Run what passes for the test suite for our Python code, too.  Ditto here
 # about checkPhase.
-if ! nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'; then
+if ! nix-shell shell.nix --run 'cp ./spike.py /tmp; python /tmp/spike.py'; then
     echo "spike failed"
     exit 2
 fi
