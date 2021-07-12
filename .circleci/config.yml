@@ -154,20 +154,9 @@ jobs:
             - "/nix"
 
       - run:
-          name: "Build"
+          name: "Build and Test"
           command: |
-            nix-build default-challenge-bypass-ristretto-ffi.nix -A lib
-
-      - run:
-          name: "Check pkg-config"
-          command: |
-            nix-shell -p ./result-lib pkg-config --run 'pkg-config --exists libchallenge_bypass_ristretto_ffi'
-
-      - run:
-          name: "Tests"
-          command: |
-            nix-shell shell.nix --run 'mv ./spike.py /tmp; python /tmp/spike.py'
-
+            ./ci-tools/run-tests.sh
 
   tests-1909:
     <<: *TESTS
