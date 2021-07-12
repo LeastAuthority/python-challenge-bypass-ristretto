@@ -161,7 +161,7 @@ jobs:
       - run:
           name: "Check pkg-config"
           command: |
-            nix-shell -p ./result pkg-config --run 'pkg-config --exists libchallenge_bypass_ristretto_ffi'
+            nix-shell -p ./result-lib pkg-config --run 'pkg-config --exists libchallenge_bypass_ristretto_ffi'
 
       - run:
           name: "Tests"
