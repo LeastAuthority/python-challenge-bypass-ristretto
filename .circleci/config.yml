@@ -1,27 +1,8 @@
 version: 2.1
 
-jobs:
-  package-template: &PACKAGE_TEMPLATE
-    environment:
-      # PyPI authentication configuration for twine so we can upload packages.
-      # TWINE_PASSWORD is set in the CircleCI private configuration section.
-      # In the CircleCI web app:
-      #
-      #    Project Settings ->
-      #    Environment Variables ->
-      #    Add Environment Variable ->
-      #    Name: TWINE_PASSWORD
-      #    Value: <a token issued by PyPI>
-      #
-      # The PyPI token is issued in the PyPI web app:
-      #
-      #    Manage ->
-      #    Settings ->
-      #    Create a token for ... ->
-      #    Permissions: Upload
-      #    Scope: Project: python-challenge-bypass-ristretto
-      TWINE_USERNAME: "__token__"
-
+commands:
+  build-wheel:
+    description: "Build a Python wheel"
     steps:
       - "checkout"
       - run:
@@ -71,15 +52,38 @@ jobs:
             fi
             python3 -m twine upload --repository $repo dist/*
 
-
+jobs:
   package-ubuntu:
-    <<: *PACKAGE_TEMPLATE
+    environment:
+      # PyPI authentication configuration for twine so we can upload packages.
+      # TWINE_PASSWORD is set in the CircleCI private configuration section.
+      # In the CircleCI web app:
+      #
+      #    Project Settings ->
+      #    Environment Variables ->
+      #    Add Environment Variable ->
+      #    Name: TWINE_PASSWORD
+      #    Value: <a token issued by PyPI>
+      #
+      # The PyPI token is issued in the PyPI web app:
+      #
+      #    Manage ->
+      #    Settings ->
+      #    Create a token for ... ->
+      #    Permissions: Upload
+      #    Scope: Project: python-challenge-bypass-ristretto
+      TWINE_USERNAME: "__token__"
 
     docker:
       - image: "circleci/python:3.9"
 
+    steps:
+      - "build-wheel"
+
   package-macos:
-    <<: *PACKAGE_TEMPLATE
+    environment:
+      # See package-ubuntu
+      TWINE_USERNAME: "__token__"
 
     parameters:
       xcode-version:
@@ -88,6 +92,8 @@ jobs:
     macos:
       xcode: "<< parameters.xcode-version >>"
 
+    steps:
+      - "build-wheel"
 
   tests-template: &TESTS
     docker:
@@ -185,6 +191,7 @@ workflows:
     jobs:
       - "tests-2105"
       - "tests-2111"
+      - "package-ubuntu"
       - "package-macos":
           matrix:
             parameters:
