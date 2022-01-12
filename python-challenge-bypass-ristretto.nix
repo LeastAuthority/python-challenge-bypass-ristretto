@@ -1,6 +1,6 @@
 # A basic packaging of this very project: Python bindings to the Rust
 # Ristretto implementation.
-{ ristretto, git, python, pythonPackages, setuptools_scm, milksnake, cffi, attrs, testtools, hypothesis }:
+{ challenge-bypass-ristretto-ffi, git, python, pythonPackages, setuptools_scm, milksnake, cffi, attrs, testtools, hypothesis }:
 pythonPackages.buildPythonPackage rec {
   version = "0.0.0";
   pname = "python-challenge-bypass-ristretto";
@@ -16,8 +16,8 @@ pythonPackages.buildPythonPackage rec {
       --replace "['cargo', 'build', '--release']" "['sh', '-c', ':']" \
       --replace "./challenge-bypass-ristretto-ffi" "/" \
       --replace "_DYLIB_NAME = 'challenge_bypass_ristretto'" "_DYLIB_NAME = 'challenge_bypass_ristretto_ffi'" \
-      --replace "target/release" "${ristretto.lib}/lib" \
-      --replace "./src" "${ristretto.src}/src"
+      --replace "target/release" "${challenge-bypass-ristretto-ffi.lib}/lib" \
+      --replace "./src" "${challenge-bypass-ristretto-ffi.src}/src"
   '';
 
   nativeBuildInputs = [
@@ -26,7 +26,7 @@ pythonPackages.buildPythonPackage rec {
   ];
 
   propagatedNativeBuildInputs = [
-    ristretto.lib
+    challenge-bypass-ristretto-ffi.lib
   ];
 
   propagatedBuildInputs = [
