@@ -8,7 +8,7 @@ in
 # Brave's Ristretto library is not in nixpkgs so provide the package we're
 # maintaining.
 , challenge-bypass-ristretto-ffi-repo ? sources.challenge-bypass-ristretto-ffi
-, challenge-bypass-ristretto-ffi ? pkgs.callPackage ./challenge-bypass-ristretto.nix { src = challenge-bypass-ristretto-ffi-repo; }
+, challenge-bypass-ristretto-ffi ? pkgs.callPackage ./challenge-bypass-ristretto.nix { inherit challenge-bypass-ristretto-ffi-repo; }
 # Choose the Python runtime for which we're building
 , pythonPackages ? pkgs.python27Packages
 }:

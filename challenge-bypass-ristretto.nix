@@ -5,7 +5,7 @@ in
 , stdenv ? pkgs.stdenv
 , lib ? pkgs.lib
 , darwin ? pkgs.darwin
-, src ? sources.challenge-bypass-ristretto-ffi
+, challenge-bypass-ristretto-ffi-repo ? sources.challenge-bypass-ristretto-ffi
 }:
 let
   withSecurity = attrs: {
@@ -65,7 +65,7 @@ let
     # Git submodules make everything more complicated though so I'd rather just
     # always say we built from the canonical revision from Github.  Override the
     # src defined in the generated expression to say that.
-    inherit src;
+    src = challenge-bypass-ristretto-ffi-repo;
 
     postInstall = ''
     # Provide the ffi header file things can be compiled against the library.
