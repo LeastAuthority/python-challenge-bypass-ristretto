@@ -158,11 +158,6 @@ jobs:
           command: |
             ./ci-tools/run-tests.sh
 
-  tests-2009:
-    <<: *TESTS
-    environment:
-      NIXPKGS_REV: "20.09"
-
   tests-2105:
     <<: *TESTS
     environment:
@@ -177,7 +172,6 @@ workflows:
   version: 2
   all-tests:
     jobs:
-      - "tests-2009"
       - "tests-2105"
       - "tests-2111"
       - "package-macos":
