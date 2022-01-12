@@ -2,7 +2,7 @@ let
   sources = import nix/sources.nix;
 in
 { pkgs ? import sources.nixpkgs { }
-, python ? pkgs.python2
+, python ? pkgs.python39
 }:
 let
   challenge-bypass-ristretto-ffi = pkgs.callPackage ./challenge-bypass-ristretto.nix {
