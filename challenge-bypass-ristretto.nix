@@ -1,4 +1,4 @@
-{ pkgs, stdenv, lib, darwin }:
+{ pkgs, stdenv ? pkgs.stdenv, lib ? pkgs.lib, darwin ? pkgs.darwin }:
 let
   withSecurity = attrs: {
     buildInputs = lib.optional stdenv.isDarwin darwin.apple_sdk.frameworks.Security;
@@ -84,4 +84,18 @@ Libs: -L$lib -lchallenge_bypass_ristretto_ffi
 Cflags: -I$lib/include
 EOF
   '';
+
+  passthru.tests = {
+    simple = pkgs.runCommand "${pname}-tests" {} ''
+    # Verify that we are supplying the dynamic libraries in a discoverable way.
+    if ! ${pkgs.pkg-config}/bin/pkg-config --exists ${pname}; then
+      echo "Failed to discover ${pname} with pkg-config"
+      exit 1
+    fi
+    if ! ${pkgs.pkg-config}/bin/pkg-config --validate ${pname}; then
+      echo "Failed to validate ${pname}.pc with pkg-config"
+      exit 1
+    fi
+    '';
+  };
 })
