@@ -50,17 +50,17 @@ jobs:
           name: "Get Python Build/Package Dependencies"
           command: |
             # Make sure we have a pip that's aware of Python version constraints
-            pip install --upgrade pip
+            python3 -m pip install --upgrade pip
             # Pre-install these two setup_depends using pip so we don't have
             # to rely on whatever resolution logic setuptools would apply.
-            pip install --upgrade milksnake setuptools_scm
+            python3 -m pip install --upgrade milksnake setuptools_scm
             # And get these so we can build and then upload a wheel
-            pip install wheel twine
+            python3 -m pip install wheel twine
 
       - run:
           name: "Build Wheel"
           command: |
-            python setup.py bdist_wheel
+            python3 setup.py bdist_wheel
 
       - run:
           name: "Upload Wheel"
@@ -76,7 +76,7 @@ jobs:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
-            python -m twine upload --repository $repo dist/*
+            python3 -m twine upload --repository $repo dist/*
 
   tests-template: &TESTS
     docker:
@@ -179,10 +179,10 @@ workflows:
             parameters:
               # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
               xcode-version:
-                # Latest macOS 10.14
-                - "11.1.0"
-                # The newest macOS 10.15 that still has Python 2. :/
-                - "11.4.1"
+                # Latest macOS 10.x
+                - "12.4.0"
+                # Latest macOS 11.x
+                - "13.2.1"
           filters:
             # CircleCI does not run workflows for tags unless you explicitly
             # specify tag filters. Additionally, if a job requires any other
