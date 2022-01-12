@@ -78,7 +78,7 @@ jobs:
             fi
             python -m twine upload --repository $repo dist/*
 
-  tests-353333: &TESTS
+  tests-template: &TESTS
     docker:
       # Run in a highly Nix-capable environment.
       - image: "nixorg/nix:circleci"
@@ -90,7 +90,7 @@ jobs:
       # time of this comment.  We can bump it to a newer version when that
       # makes sense.  Meanwhile, the platform won't shift around beneath us
       # unexpectedly.
-      NIXPKGS_REV: "353333ef340952c05332e3c271dff953264cb017"
+      NIXPKGS_REV: "XXX" # Set this in a derived environment.
 
     steps:
       - run:
