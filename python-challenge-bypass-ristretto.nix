@@ -5,6 +5,8 @@ pythonPackages.buildPythonPackage rec {
   version = "0.0.0";
   pname = "python-challenge-bypass-ristretto";
   name = "${pname}-${version}";
+  # TODO: It would be nice to cleanSource here but that excludes .git and
+  # setuptools_scm fails without it.
   src = ./.;
 
   # We hack up setup.py a bit.  We're going to supply a pre-built Ristretto
