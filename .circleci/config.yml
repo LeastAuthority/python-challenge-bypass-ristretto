@@ -158,11 +158,6 @@ jobs:
           command: |
             ./ci-tools/run-tests.sh
 
-  tests-1909:
-    <<: *TESTS
-    environment:
-      NIXPKGS_REV: "19.09"
-
   tests-2009:
     <<: *TESTS
     environment:
