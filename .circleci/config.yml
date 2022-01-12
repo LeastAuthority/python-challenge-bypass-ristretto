@@ -1,14 +1,7 @@
 version: 2.1
 
 jobs:
-  package-macos:
-    parameters:
-      xcode-version:
-        type: "string"
-
-    macos:
-      xcode: "<< parameters.xcode-version >>"
-
+  package-template: &PACKAGE_TEMPLATE
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
       # TWINE_PASSWORD is set in the CircleCI private configuration section.
@@ -77,6 +70,24 @@ jobs:
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
             python3 -m twine upload --repository $repo dist/*
+
+
+  package-ubuntu:
+    <<: *PACKAGE_TEMPLATE
+
+    docker:
+      - image: "circleci/python:3.9"
+
+  package-macos:
+    <<: *PACKAGE_TEMPLATE
+
+    parameters:
+      xcode-version:
+        type: "string"
+
+    macos:
+      xcode: "<< parameters.xcode-version >>"
+
 
   tests-template: &TESTS
     docker:
