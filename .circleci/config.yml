@@ -64,6 +64,10 @@ jobs:
         description: "The path to the Python executable to use"
         type: "string"
 
+      image:
+        description: "The Docker image to use"
+        type: "string"
+
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
       # TWINE_PASSWORD is set in the CircleCI private configuration section.
