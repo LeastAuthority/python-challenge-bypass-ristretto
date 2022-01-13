@@ -82,7 +82,7 @@ jobs:
 
   package-macos:
     environment:
-      # See package-ubuntu
+      # See package-manylinux1
       TWINE_USERNAME: "__token__"
 
     parameters:
@@ -191,7 +191,7 @@ workflows:
     jobs:
       - "tests-2105"
       - "tests-2111"
-      - "package-ubuntu"
+      - "package-manylinux1"
       - "package-macos":
           matrix:
             parameters:
