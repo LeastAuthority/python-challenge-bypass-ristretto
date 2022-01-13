@@ -22,26 +22,6 @@ commands:
         type: "string"
         default: "python3"
 
-    environment:
-      # PyPI authentication configuration for twine so we can upload packages.
-      # TWINE_PASSWORD is set in the CircleCI private configuration section.
-      # In the CircleCI web app:
-      #
-      #    Project Settings ->
-      #    Environment Variables ->
-      #    Add Environment Variable ->
-      #    Name: TWINE_PASSWORD
-      #    Value: <a token issued by PyPI>
-      #
-      # The PyPI token is issued in the PyPI web app:
-      #
-      #    Manage ->
-      #    Settings ->
-      #    Create a token for ... ->
-      #    Permissions: Upload
-      #    Scope: Project: python-challenge-bypass-ristretto
-      TWINE_USERNAME: "__token__"
-
     steps:
       - "checkout"
       - run:
@@ -88,6 +68,26 @@ commands:
 
       - run:
           name: "Upload Wheel"
+          environment:
+            # PyPI authentication configuration for twine so we can upload
+            # packages.  TWINE_PASSWORD is set in the CircleCI private
+            # configuration section.  In the CircleCI web app:
+            #
+            #    Project Settings ->
+            #    Environment Variables ->
+            #    Add Environment Variable ->
+            #    Name: TWINE_PASSWORD
+            #    Value: <a token issued by PyPI>
+            #
+            # The PyPI token is issued in the PyPI web app:
+            #
+            #    Manage ->
+            #    Settings ->
+            #    Create a token for ... ->
+            #    Permissions: Upload
+            #    Scope: Project: python-challenge-bypass-ristretto
+            TWINE_USERNAME: "__token__"
+
           command: |
             if [[ "$CIRCLE_TAG" == v* ]]; then
               # We're building a release tag so we should probably really
