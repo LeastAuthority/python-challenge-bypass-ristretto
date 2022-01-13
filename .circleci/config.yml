@@ -214,8 +214,8 @@ workflows:
       - "package-manylinux":
           matrix:
             parameters:
-              - image: "quay.io/pypa/manylinux2014_x86_64"
-                python: "/opt/python/cp37-cp37m/bin/python"
+              image: "quay.io/pypa/manylinux2014_x86_64"
+              python: "/opt/python/cp37-cp37m/bin/python"
 
       - "package-macos":
           matrix:
