@@ -77,8 +77,8 @@ let
     cat > $lib/lib/pkgconfig/${pname}.pc <<EOF
 prefix=$lib
 exec_prefix=$lib
-libdir=$lib
-sharedlibdir=$lib
+libdir=$lib/lib
+sharedlibdir=$lib/lib
 includedir=$lib/include
 
 Name: ${pname}
@@ -86,7 +86,7 @@ Description: Ristretto-Flavored PrivacyPass library
 Version: ${version}
 
 Requires:
-Libs: -L$lib -lchallenge_bypass_ristretto_ffi
+Libs: -L$lib/lib -lchallenge_bypass_ristretto_ffi
 Cflags: -I$lib/include
 EOF
     '';
