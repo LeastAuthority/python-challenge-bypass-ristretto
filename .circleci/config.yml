@@ -78,6 +78,13 @@ jobs:
       - image: "quay.io/pypa/manylinux1_x86_64"
 
     steps:
+      # The build needs SSH to update the submodule.
+      - run:
+          name: "Install SSH Client"
+          command: |
+            yum install -y openssh-clients
+
+      # Now build the wheel.
       - "build-wheel"
 
   package-macos:
