@@ -48,6 +48,8 @@ commands:
             case "${CIRCLE_JOB}" in
               *manylinux*)
                 << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+                rm *.whl
+                mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
                 ;;
             esac
 
@@ -65,7 +67,7 @@ commands:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
-            << parameters.python >> -m twine upload --repository $repo wheelhouse/python_challenge_bypass_ristretto*.whl
+            << parameters.python >> -m twine upload --repository $repo python_challenge_bypass_ristretto*.whl
 
 jobs:
   package-manylinux:
