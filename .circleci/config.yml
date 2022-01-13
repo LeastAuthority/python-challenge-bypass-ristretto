@@ -108,7 +108,9 @@ jobs:
       - run:
           name: "Install SSH Client"
           command: |
-            yum install -y openssh-clients
+            if [ -e yum ]; then
+                yum install -y openssh-clients
+            fi
 
       - "build-wheel":
           python: "<< parameters.python >>"
