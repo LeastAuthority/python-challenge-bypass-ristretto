@@ -77,12 +77,16 @@ commands:
 jobs:
   package-manylinux:
     parameters:
-      python:
-        description: "The path to the Python executable to use"
-        type: "string"
-
       executor:
         type: "executor"
+
+      install-ssh-client:
+        description: "a command to install an SSH client prior to cloning git repositoties"
+        type: "string"
+
+      python:
+        description: "the path to the Python executable to use"
+        type: "string"
 
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
@@ -111,9 +115,7 @@ jobs:
       - run:
           name: "Install SSH Client"
           command: |
-            if [ -e yum ]; then
-                yum install -y openssh-clients
-            fi
+            << parameters.install-ssh-client >>
 
       - "build-wheel":
           python: "<< parameters.python >>"
@@ -231,8 +233,9 @@ workflows:
       - "tests-2111"
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
-          python: "/opt/python/cp37-cp37m/bin/python"
           executor: "manylinux-2014_x86_64"
+          install-ssh-client: "yum install -y openssh-clients"
+          python: "/opt/python/cp37-cp37m/bin/python"
 
       # - "package-manylinux":
       #     name: "package-manylinux_2_24-x86_64"
