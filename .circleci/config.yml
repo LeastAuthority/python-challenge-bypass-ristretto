@@ -45,7 +45,11 @@ commands:
       - run:
           name: "Audix / Fix Wheel "
           command: |
-            << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+            case "${CIRCLE_JOB}" in
+              *manylinux*)
+                << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+                ;;
+            esac
 
       - run:
           name: "Upload Wheel"
