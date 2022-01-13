@@ -2,6 +2,11 @@ version: 2.1
 
 commands:
   build-wheel:
+    parameters:
+      python:
+        description: "The path to the Python executable to use"
+        type: "string"
+
     description: "Build a Python wheel"
     steps:
       - "checkout"
@@ -24,17 +29,17 @@ commands:
           name: "Get Python Build/Package Dependencies"
           command: |
             # Make sure we have a pip that's aware of Python version constraints
-            python3 -m pip install --upgrade pip
+            << parameters.python >> -m pip install --upgrade pip
             # Pre-install these two setup_depends using pip so we don't have
             # to rely on whatever resolution logic setuptools would apply.
-            python3 -m pip install --upgrade milksnake setuptools_scm
+            << parameters.python >> -m pip install --upgrade milksnake setuptools_scm
             # And get these so we can build and then upload a wheel
-            python3 -m pip install wheel twine
+            << parameters.python >> -m pip install wheel twine
 
       - run:
           name: "Build Wheel"
           command: |
-            python3 setup.py bdist_wheel
+            << parameters.python >> setup.py bdist_wheel
 
       - run:
           name: "Upload Wheel"
@@ -50,10 +55,15 @@ commands:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
-            python3 -m twine upload --repository $repo dist/*
+            << parameters.python >> -m twine upload --repository $repo dist/*
 
 jobs:
-  package-manylinux2014_x86_64:
+  package-manylinux:
+    parameters:
+      python:
+        description: "The path to the Python executable to use"
+        type: "string"
+
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
       # TWINE_PASSWORD is set in the CircleCI private configuration section.
@@ -75,7 +85,7 @@ jobs:
       TWINE_USERNAME: "__token__"
 
     docker:
-      - image: "quay.io/pypa/manylinux2014_x86_64"
+      - image: "<< parameters.image >>"
 
     steps:
       # The build needs SSH to update the submodule.
@@ -197,7 +207,12 @@ workflows:
     jobs:
       - "tests-2105"
       - "tests-2111"
-      - "package-manylinux2014_x86_64"
+      - "package-manylinux":
+          matrix:
+            parameters:
+              - image: "quay.io/pypa/manylinux2014_x86_64"
+                python: "/opt/python/cp37-cp37m/bin/python"
+
       - "package-macos":
           matrix:
             parameters:
