@@ -252,7 +252,9 @@ workflows:
       - "package-manylinux":
           name: "package-manylinux_2_24-aarch64"
           executor: "manylinux_2_24-aarch64"
-          install-ssh-client: "apt-get update -y && apt-get install -y openssh-client"
+          install-ssh-client: |
+            sudo apt-get update -y
+            sudo apt-get install -y openssh-client
           python: "python3"
 
       - "package-macos":
