@@ -228,6 +228,14 @@ workflows:
           name: "package-manylinux-2014_x86_64"
           image: "quay.io/pypa/manylinux2014_x86_64"
           python: "/opt/python/cp37-cp37m/bin/python"
+      - "package-manylinux":
+          name: "package-manylinux_2_24-x86_64"
+          image: "quay.io/pypa/manylinux_2_24_x86_64"
+          python: "/opt/python/cp37-cp37m/bin/python"
+      - "package-manylinux":
+          name: "package-manylinux_2_24-aarch64"
+          image: "quay.io/pypa/manylinux_2_24_aarch64"
+          python: "/opt/python/cp37-cp37m/bin/python"
 
       - "package-macos":
           matrix:
