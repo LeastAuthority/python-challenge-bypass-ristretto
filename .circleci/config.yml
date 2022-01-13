@@ -76,9 +76,8 @@ jobs:
         description: "The path to the Python executable to use"
         type: "string"
 
-      image:
-        description: "The Docker image to use"
-        type: "string"
+      executor:
+        type: "executor"
 
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
@@ -100,8 +99,7 @@ jobs:
       #    Scope: Project: python-challenge-bypass-ristretto
       TWINE_USERNAME: "__token__"
 
-    docker:
-      - image: "<< parameters.image >>"
+    executor: "<< parameters.executor >>"
 
     steps:
       # The build needs SSH to update the submodule.
@@ -228,16 +226,19 @@ workflows:
       - "tests-2111"
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
-          image: "quay.io/pypa/manylinux2014_x86_64"
           python: "/opt/python/cp37-cp37m/bin/python"
-      - "package-manylinux":
-          name: "package-manylinux_2_24-x86_64"
-          image: "quay.io/pypa/manylinux_2_24_x86_64"
-          python: "/opt/python/cp37-cp37m/bin/python"
-      - "package-manylinux":
-          name: "package-manylinux_2_24-aarch64"
-          image: "quay.io/pypa/manylinux_2_24_aarch64"
-          python: "/opt/python/cp37-cp37m/bin/python"
+          executor:
+            docker:
+              - image: "quay.io/pypa/manylinux2014_x86_64"
+
+      # - "package-manylinux":
+      #     name: "package-manylinux_2_24-x86_64"
+      #     image: "quay.io/pypa/manylinux_2_24_x86_64"
+      #     python: "/opt/python/cp37-cp37m/bin/python"
+      # - "package-manylinux":
+      #     name: "package-manylinux_2_24-aarch64"
+      #     image: "quay.io/pypa/manylinux_2_24_aarch64"
+      #     python: "/opt/python/cp37-cp37m/bin/python"
 
       - "package-macos":
           matrix:
