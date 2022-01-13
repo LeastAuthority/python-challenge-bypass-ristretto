@@ -252,6 +252,10 @@ workflows:
       - "package-manylinux":
           name: "package-manylinux_2_24-aarch64"
           executor: "manylinux_2_24-aarch64"
+          install-ssh-client: |
+            sudo apt-get update
+            # an auditwheel dependency that's not installed by default
+            sudo apt-get install patchelf
           python: "python3"
 
       - "package-macos":
