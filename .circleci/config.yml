@@ -1,5 +1,10 @@
 version: 2.1
 
+executors:
+  manylinux-2014_x86_64:
+    docker:
+      - image: "quay.io/pypa/manylinux2014_x86_64"
+
 commands:
   build-wheel:
     parameters:
@@ -227,9 +232,7 @@ workflows:
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
           python: "/opt/python/cp37-cp37m/bin/python"
-          executor:
-            docker:
-              - image: "quay.io/pypa/manylinux2014_x86_64"
+          executor: "manylinux-2014_x86_64"
 
       # - "package-manylinux":
       #     name: "package-manylinux_2_24-x86_64"
