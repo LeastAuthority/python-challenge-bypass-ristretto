@@ -40,7 +40,7 @@ commands:
       - run:
           name: "Build Wheel"
           command: |
-            << parameters.python >> setup.py bdist_wheel
+            << parameters.python >> -m pip wheel .
 
       - run:
           name: "Upload Wheel"
