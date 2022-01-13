@@ -53,7 +53,7 @@ commands:
             python3 -m twine upload --repository $repo dist/*
 
 jobs:
-  package-ubuntu:
+  package-manylinux1:
     environment:
       # PyPI authentication configuration for twine so we can upload packages.
       # TWINE_PASSWORD is set in the CircleCI private configuration section.
@@ -75,7 +75,7 @@ jobs:
       TWINE_USERNAME: "__token__"
 
     docker:
-      - image: "circleci/python:3.9"
+      - image: "quay.io/pypa/manylinux1_x86_64"
 
     steps:
       - "build-wheel"
