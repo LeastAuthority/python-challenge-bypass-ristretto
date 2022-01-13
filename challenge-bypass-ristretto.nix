@@ -77,8 +77,8 @@ let
     cat > $lib/lib/pkgconfig/${pname}.pc <<EOF
 prefix=$lib
 exec_prefix=$lib
-libdir=$lib
-sharedlibdir=$lib
+libdir=$lib/lib
+sharedlibdir=$lib/lib
 includedir=$lib/include
 
 Name: ${pname}
@@ -86,7 +86,7 @@ Description: Ristretto-Flavored PrivacyPass library
 Version: ${version}
 
 Requires:
-Libs: -L$lib -lchallenge_bypass_ristretto_ffi
+Libs: -L$lib/lib -lchallenge_bypass_ristretto_ffi
 Cflags: -I$lib/include
 EOF
     '';
@@ -117,6 +117,17 @@ if ! pkg-config --validate ${pname}; then
   echo "Failed to validate ${pname}.pc with pkg-config"
   exit 1
 fi
+
+cat >main.c <<EOF
+#include "lib.h"
+int main(int argc, char** argv) {
+    (void)signing_key_random();
+    return 0;
+}
+EOF
+${pkgs.clang}/bin/clang $(pkg-config --libs --cflags ${pname}) main.c -o main
+./main
+
 echo "passed" > "$out"
 '';
   };
