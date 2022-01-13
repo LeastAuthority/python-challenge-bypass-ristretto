@@ -14,13 +14,34 @@ executors:
 
 commands:
   build-wheel:
+    description: "Build a Python wheel"
+
     parameters:
       python:
         description: "The path to the Python executable to use"
         type: "string"
         default: "python3"
 
-    description: "Build a Python wheel"
+    environment:
+      # PyPI authentication configuration for twine so we can upload packages.
+      # TWINE_PASSWORD is set in the CircleCI private configuration section.
+      # In the CircleCI web app:
+      #
+      #    Project Settings ->
+      #    Environment Variables ->
+      #    Add Environment Variable ->
+      #    Name: TWINE_PASSWORD
+      #    Value: <a token issued by PyPI>
+      #
+      # The PyPI token is issued in the PyPI web app:
+      #
+      #    Manage ->
+      #    Settings ->
+      #    Create a token for ... ->
+      #    Permissions: Upload
+      #    Scope: Project: python-challenge-bypass-ristretto
+      TWINE_USERNAME: "__token__"
+
     steps:
       - "checkout"
       - run:
@@ -96,25 +117,6 @@ jobs:
         description: "the path to the Python executable to use"
         type: "string"
 
-    environment:
-      # PyPI authentication configuration for twine so we can upload packages.
-      # TWINE_PASSWORD is set in the CircleCI private configuration section.
-      # In the CircleCI web app:
-      #
-      #    Project Settings ->
-      #    Environment Variables ->
-      #    Add Environment Variable ->
-      #    Name: TWINE_PASSWORD
-      #    Value: <a token issued by PyPI>
-      #
-      # The PyPI token is issued in the PyPI web app:
-      #
-      #    Manage ->
-      #    Settings ->
-      #    Create a token for ... ->
-      #    Permissions: Upload
-      #    Scope: Project: python-challenge-bypass-ristretto
-      TWINE_USERNAME: "__token__"
 
     executor: "<< parameters.executor >>"
 
@@ -129,10 +131,6 @@ jobs:
           python: "<< parameters.python >>"
 
   package-macos:
-    environment:
-      # See package-manylinux2014_x86_64
-      TWINE_USERNAME: "__token__"
-
     parameters:
       xcode-version:
         type: "string"
