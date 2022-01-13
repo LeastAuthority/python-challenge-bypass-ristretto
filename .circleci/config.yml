@@ -7,6 +7,10 @@ executors:
   manylinux_2_24-x86_64:
     docker:
       - image: "quay.io/pypa/manylinux_2_24_x86_64"
+  manylinux_2_24-aarch64:
+    machine:
+      image: "ubuntu-2004:202101-01"
+    resource_class: "arm.medium"
 
 commands:
   build-wheel:
@@ -245,10 +249,11 @@ workflows:
           executor: "manylinux_2_24-x86_64"
           install-ssh-client: "apt-get update -y && apt-get install -y openssh-client"
           python: "/opt/python/cp37-cp37m/bin/python"
-      # - "package-manylinux":
-      #     name: "package-manylinux_2_24-aarch64"
-      #     image: "quay.io/pypa/manylinux_2_24_aarch64"
-      #     python: "/opt/python/cp37-cp37m/bin/python"
+      - "package-manylinux":
+          name: "package-manylinux_2_24-aarch64"
+          executor: "manylinux_2_24-aarch64"
+          install-ssh-client: "apt-get update -y && apt-get install -y openssh-client"
+          python: "python3"
 
       - "package-macos":
           matrix:
