@@ -86,6 +86,7 @@ jobs:
       install-ssh-client:
         description: "a command to install an SSH client prior to cloning git repositoties"
         type: "string"
+        default: ""
 
       python:
         description: "the path to the Python executable to use"
