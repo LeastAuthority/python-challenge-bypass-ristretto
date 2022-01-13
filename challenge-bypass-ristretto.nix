@@ -117,6 +117,17 @@ if ! pkg-config --validate ${pname}; then
   echo "Failed to validate ${pname}.pc with pkg-config"
   exit 1
 fi
+
+cat >main.c <<EOF
+#include "lib.h"
+int main(int argc, char** argv) {
+    (void)signing_key_random();
+    return 0;
+}
+EOF
+${pkgs.clang}/bin/clang $(pkg-config --libs --cflags ${pname}) main.c -o main
+./main
+
 echo "passed" > "$out"
 '';
   };
