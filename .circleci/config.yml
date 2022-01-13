@@ -1,5 +1,8 @@
 version: 2.1
 
+# Define executors that various packaging jobs need.  This lets us make one
+# packaging job that accepts an executor parameter and avoids duplicating the
+# packaging steps.
 executors:
   manylinux-2014-x86_64:
     docker:
@@ -7,11 +10,21 @@ executors:
   manylinux_2_24-x86_64:
     docker:
       - image: "quay.io/pypa/manylinux_2_24_x86_64"
-  manylinux_2_24-aarch64:
+
+  # Since this executor doesn't use a pypa-defined image created specifically
+  # for building wheels, we're a little bit less confident of exactly what
+  # kind of manylinux wheel will come out of it.  x_y here is a reference to
+  # the "future-proof" (heh) PEP 600 manylinux definition.  For a given pinned
+  # image, we should probably always get the same version out (eg
+  # manylinux_2_17 as of ubuntu-2004:202101-01) but if glibc on the system is
+  # upgraded then we'll probably get higher numbers.
+  manylinux_x_y-aarch64:
     machine:
       image: "ubuntu-2004:202101-01"
     resource_class: "arm.large"
 
+# Define some custom commands that we can use as elements of `steps` in job
+# definitions.
 commands:
   build-wheel:
     description: "Build a Python wheel"
@@ -58,10 +71,16 @@ commands:
       - run:
           name: "Audix / Fix Wheel "
           command: |
+            # Since both macOS and Linux jobs re-use this step, make sure we
+            # only try to use auditwheel on the appropriate platform.  That
+            # is, only on Linux.
             case "${CIRCLE_JOB}" in
               *manylinux*)
                 << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+                # Delete the original, unfixed wheel.
                 rm *.whl
+                # Move the fixed wheel here for consistency with the
+                # non-manylinux case.
                 mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
                 ;;
             esac
@@ -102,14 +121,21 @@ commands:
             fi
             << parameters.python >> -m twine upload --repository $repo python_challenge_bypass_ristretto*.whl
 
+# Define the actual jobs that will be available to run in a workflow.
 jobs:
+
+  # Build a manylinux wheel.
   package-manylinux:
     parameters:
       executor:
+        # note the name comes from the `executors` section above
+        description: "the name of the executor to use to run this job"
         type: "executor"
 
-      install-ssh-client:
-        description: "a command to install an SSH client prior to cloning git repositoties"
+      pre-command:
+        description: |
+          a command to run first which resolves any inconsistencies between
+          the chosen executor and the requirements of this job
         type: "string"
         default: ""
 
@@ -121,11 +147,10 @@ jobs:
     executor: "<< parameters.executor >>"
 
     steps:
-      # The build needs SSH to update the submodule.
       - run:
-          name: "Install SSH Client"
+          name: "Prepare Execution Environment"
           command: |
-            << parameters.install-ssh-client >>
+            << parameters.pre-command >>
 
       - "build-wheel":
           python: "<< parameters.python >>"
@@ -240,19 +265,24 @@ workflows:
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
           executor: "manylinux-2014-x86_64"
-          install-ssh-client: "yum install -y openssh-clients"
+          # The image this executor uses comes with no ssh client.  CircleCI
+          # rewrites our git configuration to fetch sources over ssh.  Then it
+          # fails if we don't have any ssh client.
+          pre-command: "yum install -y openssh-clients"
           python: "/opt/python/cp37-cp37m/bin/python"
       - "package-manylinux":
           name: "package-manylinux_2_24-x86_64"
           executor: "manylinux_2_24-x86_64"
-          install-ssh-client: "apt-get update -y && apt-get install -y openssh-client"
+          # Similar to the manylinux-2014_x86_64 case.
+          pre-command: "apt-get update -y && apt-get install -y openssh-client"
           python: "/opt/python/cp37-cp37m/bin/python"
       - "package-manylinux":
-          name: "package-manylinux_2_24-aarch64"
-          executor: "manylinux_2_24-aarch64"
-          install-ssh-client: |
+          name: "package-manylinux_x_y-aarch64"
+          executor: "manylinux_x_y-aarch64"
+          # The image this executor uses has an ssh client but is missing the
+          # patchelf tool required by auditwheel.
+          pre-command: |
             sudo apt-get update
-            # an auditwheel dependency that's not installed by default
             sudo apt-get install patchelf
           python: "python3"
 
@@ -261,12 +291,12 @@ workflows:
             parameters:
               # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
               xcode-version:
+                # Latest macOS 10.14.x
+                - "11.1.0"
                 # Latest macOS 10.15.x
                 - "12.4.0"
                 # Latest macOS 11.x
                 - "13.2.1"
-                # Just see if we can still have a 10.14.x
-                - "11.1.0"
           filters:
             # CircleCI does not run workflows for tags unless you explicitly
             # specify tag filters. Additionally, if a job requires any other
