@@ -99,8 +99,7 @@ jobs:
             yum install -y openssh-clients
 
       - "build-wheel":
-          parameters:
-            python: "<< parameters.python >>"
+          python: "<< parameters.python >>"
 
   package-macos:
     environment:
