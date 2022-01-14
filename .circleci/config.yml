@@ -1,33 +1,31 @@
 version: 2.1
 
-jobs:
-  package-macos:
+# Define executors that various packaging jobs need.  This lets us make one
+# packaging job that accepts an executor parameter and avoids duplicating the
+# packaging steps.
+executors:
+  manylinux-2014-x86_64:
+    docker:
+      - image: "quay.io/pypa/manylinux2014_x86_64"
+  manylinux_2_24-x86_64:
+    docker:
+      - image: "quay.io/pypa/manylinux_2_24_x86_64"
+
+# Define some custom commands that we can use as elements of `steps` in job
+# definitions.
+commands:
+  build-wheel:
+    description: "Build a Python wheel"
+
     parameters:
-      xcode-version:
+      python:
+        description: "The path to the Python executable to use"
         type: "string"
+        default: "python3"
 
-    macos:
-      xcode: "<< parameters.xcode-version >>"
-
-    environment:
-      # PyPI authentication configuration for twine so we can upload packages.
-      # TWINE_PASSWORD is set in the CircleCI private configuration section.
-      # In the CircleCI web app:
-      #
-      #    Project Settings ->
-      #    Environment Variables ->
-      #    Add Environment Variable ->
-      #    Name: TWINE_PASSWORD
-      #    Value: <a token issued by PyPI>
-      #
-      # The PyPI token is issued in the PyPI web app:
-      #
-      #    Manage ->
-      #    Settings ->
-      #    Create a token for ... ->
-      #    Permissions: Upload
-      #    Scope: Project: python-challenge-bypass-ristretto
-      TWINE_USERNAME: "__token__"
+      audit-wheel:
+        description: "A boolean controlling whether the auditwheel tool is used to fix up the wheel"
+        type: "boolean"
 
     steps:
       - "checkout"
@@ -43,27 +41,69 @@ jobs:
           name: "Install Rust Build Toolchain"
           command: |
             curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/rustup-init
-            sh /tmp/rustup-init -y --default-toolchain stable
-            . "$HOME"/.cargo/env
+            for i in $(seq 10); do
+                if sh /tmp/rustup-init -y --default-toolchain stable; then
+                    break
+                else
+                    sleep 1
+                fi
+            done
+            echo '. "$HOME"/.cargo/env' >> $BASH_ENV
 
       - run:
           name: "Get Python Build/Package Dependencies"
           command: |
             # Make sure we have a pip that's aware of Python version constraints
-            pip install --upgrade pip
+            << parameters.python >> -m pip install --upgrade pip
             # Pre-install these two setup_depends using pip so we don't have
             # to rely on whatever resolution logic setuptools would apply.
-            pip install --upgrade milksnake setuptools_scm
-            # And get these so we can build and then upload a wheel
-            pip install wheel twine
+            << parameters.python >> -m pip install --upgrade milksnake setuptools_scm
+            # And get these so we can build, fix, and upload a wheel.
+            << parameters.python >> -m pip install wheel auditwheel twine
 
       - run:
           name: "Build Wheel"
           command: |
-            python setup.py bdist_wheel
+            << parameters.python >> -m pip wheel --no-deps .
+
+      - when:
+          condition: << parameters.audit-wheel >>
+          steps:
+            - run:
+                name: "Audix / Fix Wheel"
+                command: |
+                  # Since both macOS and Linux jobs re-use this step, make
+                  # sure we only try to use auditwheel on the appropriate
+                  # platform.  That is, only on Linux.
+                  << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+                  # Delete the original, unfixed wheel.
+                  rm *.whl
+                  # Move the fixed wheel here for consistency with the
+                  # non-manylinux case.
+                  mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
 
       - run:
           name: "Upload Wheel"
+          environment:
+            # PyPI authentication configuration for twine so we can upload
+            # packages.  TWINE_PASSWORD is set in the CircleCI private
+            # configuration section.  In the CircleCI web app:
+            #
+            #    Project Settings ->
+            #    Environment Variables ->
+            #    Add Environment Variable ->
+            #    Name: TWINE_PASSWORD
+            #    Value: <a token issued by PyPI>
+            #
+            # The PyPI token is issued in the PyPI web app:
+            #
+            #    Manage ->
+            #    Settings ->
+            #    Create a token for ... ->
+            #    Permissions: Upload
+            #    Scope: Project: python-challenge-bypass-ristretto
+            TWINE_USERNAME: "__token__"
+
           command: |
             if [[ "$CIRCLE_TAG" == v* ]]; then
               # We're building a release tag so we should probably really
@@ -76,9 +116,57 @@ jobs:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
-            python -m twine upload --repository $repo dist/*
+            << parameters.python >> -m twine upload --repository $repo python_challenge_bypass_ristretto*.whl
 
-  tests-353333: &TESTS
+# Define the actual jobs that will be available to run in a workflow.
+jobs:
+
+  # Build a manylinux wheel.
+  package-manylinux:
+    parameters:
+      executor:
+        # note the name comes from the `executors` section above
+        description: "the name of the executor to use to run this job"
+        type: "executor"
+
+      pre-command:
+        description: |
+          a command to run first which resolves any inconsistencies between
+          the chosen executor and the requirements of this job
+        type: "string"
+        default: ""
+
+      python:
+        description: "the path to the Python executable to use"
+        type: "string"
+
+
+    executor: "<< parameters.executor >>"
+
+    steps:
+      - run:
+          name: "Prepare Execution Environment"
+          command: |
+            << parameters.pre-command >>
+
+      - "build-wheel":
+          python: "<< parameters.python >>"
+          audit-wheel: true
+
+  package-macos:
+    parameters:
+      xcode-version:
+        type: "string"
+
+    macos:
+      xcode: "<< parameters.xcode-version >>"
+
+    steps:
+      - "build-wheel":
+          audit-wheel: false
+
+
+  tests-template: &TESTS
     docker:
       # Run in a highly Nix-capable environment.
       - image: "nixorg/nix:circleci"
@@ -90,7 +178,7 @@ jobs:
       # time of this comment.  We can bump it to a newer version when that
       # makes sense.  Meanwhile, the platform won't shift around beneath us
       # unexpectedly.
-      NIXPKGS_REV: "353333ef340952c05332e3c271dff953264cb017"
+      NIXPKGS_REV: "XXX" # Set this in a derived environment.
 
     steps:
       - run:
@@ -158,36 +246,48 @@ jobs:
           command: |
             ./ci-tools/run-tests.sh
 
-  tests-1909:
-    <<: *TESTS
-    environment:
-      NIXPKGS_REV: "19.09"
-
-  tests-2009:
-    <<: *TESTS
-    environment:
-      NIXPKGS_REV: "20.09"
-
   tests-2105:
     <<: *TESTS
     environment:
       NIXPKGS_REV: "21.05"
 
+  tests-2111:
+    <<: *TESTS
+    environment:
+      NIXPKGS_REV: "21.11"
+
 workflows:
   version: 2
   all-tests:
     jobs:
-      - "tests-2009"
       - "tests-2105"
+      - "tests-2111"
+      - "package-manylinux":
+          name: "package-manylinux-2014_x86_64"
+          executor: "manylinux-2014-x86_64"
+          # The image this executor uses comes with no ssh client.  CircleCI
+          # rewrites our git configuration to fetch sources over ssh.  Then it
+          # fails if we don't have any ssh client.
+          pre-command: "yum install -y openssh-clients"
+          python: "/opt/python/cp37-cp37m/bin/python"
+      - "package-manylinux":
+          name: "package-manylinux_2_24-x86_64"
+          executor: "manylinux_2_24-x86_64"
+          # Similar to the manylinux-2014_x86_64 case.
+          pre-command: "apt-get update -y && apt-get install -y openssh-client"
+          python: "/opt/python/cp37-cp37m/bin/python"
+
       - "package-macos":
           matrix:
             parameters:
               # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
               xcode-version:
-                # Latest macOS 10.14
+                # Latest macOS 10.14.x
                 - "11.1.0"
-                # The newest macOS 10.15 that still has Python 2. :/
-                - "11.4.1"
+                # Latest macOS 10.15.x
+                - "12.4.0"
+                # Latest macOS 11.x
+                - "13.2.1"
           filters:
             # CircleCI does not run workflows for tags unless you explicitly
             # specify tag filters. Additionally, if a job requires any other

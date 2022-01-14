@@ -395,7 +395,7 @@ class TokenPreimageTests(TestCase):
 
 
 # The signature uses sha512.
-SIG_SIZE = 512 / 8
+SIG_SIZE = 512 // 8
 def verification_signatures():
     """
     Strategy that builds byte strings that are the right length to be

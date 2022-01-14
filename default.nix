@@ -10,7 +10,7 @@ in
 , challenge-bypass-ristretto-ffi-repo ? sources.challenge-bypass-ristretto-ffi
 , challenge-bypass-ristretto-ffi ? pkgs.callPackage ./challenge-bypass-ristretto.nix { inherit challenge-bypass-ristretto-ffi-repo; }
 # Choose the Python runtime for which we're building
-, pythonPackages ? pkgs.python27Packages
+, pythonPackages ? pkgs.python39Packages
 }:
 # Build our Python bindings in the usual way, supplying the necessary extra
 # dependency.
