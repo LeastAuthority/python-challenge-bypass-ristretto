@@ -11,18 +11,6 @@ executors:
     docker:
       - image: "quay.io/pypa/manylinux_2_24_x86_64"
 
-  # Since this executor doesn't use a pypa-defined image created specifically
-  # for building wheels, we're a little bit less confident of exactly what
-  # kind of manylinux wheel will come out of it.  x_y here is a reference to
-  # the "future-proof" (heh) PEP 600 manylinux definition.  For a given pinned
-  # image, we should probably always get the same version out (eg
-  # manylinux_2_17 as of ubuntu-2004:202101-01) but if glibc on the system is
-  # upgraded then we'll probably get higher numbers.
-  manylinux_x_y-aarch64:
-    machine:
-      image: "ubuntu-2004:202101-01"
-    resource_class: "arm.large"
-
 # Define some custom commands that we can use as elements of `steps` in job
 # definitions.
 commands:
@@ -288,15 +276,6 @@ workflows:
           # Similar to the manylinux-2014_x86_64 case.
           pre-command: "apt-get update -y && apt-get install -y openssh-client"
           python: "/opt/python/cp37-cp37m/bin/python"
-      - "package-manylinux":
-          name: "package-manylinux_x_y-aarch64"
-          executor: "manylinux_x_y-aarch64"
-          # The image this executor uses has an ssh client but is missing the
-          # patchelf tool required by auditwheel.
-          pre-command: |
-            sudo apt-get update
-            sudo apt-get install patchelf
-          python: "python3"
 
       - "package-macos":
           matrix:
