@@ -35,6 +35,10 @@ commands:
         type: "string"
         default: "python3"
 
+      audit-wheel:
+        description: "A boolean controlling whether the auditwheel tool is used to fix up the wheel"
+        type: "boolean"
+
     steps:
       - "checkout"
       - run:
@@ -74,22 +78,21 @@ commands:
           command: |
             << parameters.python >> -m pip wheel --no-deps .
 
-      - run:
-          name: "Audix / Fix Wheel "
-          command: |
-            # Since both macOS and Linux jobs re-use this step, make sure we
-            # only try to use auditwheel on the appropriate platform.  That
-            # is, only on Linux.
-            case "${CIRCLE_JOB}" in
-              *manylinux*)
-                << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
-                # Delete the original, unfixed wheel.
-                rm *.whl
-                # Move the fixed wheel here for consistency with the
-                # non-manylinux case.
-                mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
-                ;;
-            esac
+      - when:
+          condition: << parameters.audit-wheel >>
+          steps:
+            - run:
+                name: "Audix / Fix Wheel"
+                command: |
+                  # Since both macOS and Linux jobs re-use this step, make
+                  # sure we only try to use auditwheel on the appropriate
+                  # platform.  That is, only on Linux.
+                  << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+                  # Delete the original, unfixed wheel.
+                  rm *.whl
+                  # Move the fixed wheel here for consistency with the
+                  # non-manylinux case.
+                  mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
 
       - run:
           name: "Upload Wheel"
@@ -160,6 +163,7 @@ jobs:
 
       - "build-wheel":
           python: "<< parameters.python >>"
+          audit-wheel: true
 
   package-macos:
     parameters:
@@ -170,7 +174,9 @@ jobs:
       xcode: "<< parameters.xcode-version >>"
 
     steps:
-      - "build-wheel"
+      - "build-wheel":
+          audit-wheel: false
+
 
   tests-template: &TESTS
     docker:
