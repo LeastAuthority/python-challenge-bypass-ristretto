@@ -67,12 +67,12 @@ commands:
             # to rely on whatever resolution logic setuptools would apply.
             << parameters.python >> -m pip install --upgrade milksnake setuptools_scm
             # And get these so we can build, fix, and upload a wheel.
-            << parameters.python >> -m pip install wheel twine auditwheel
+            << parameters.python >> -m pip install wheel auditwheel twine
 
       - run:
           name: "Build Wheel"
           command: |
-            << parameters.python >> -m pip wheel .
+            << parameters.python >> -m pip wheel --no-deps .
 
       - run:
           name: "Audix / Fix Wheel "
