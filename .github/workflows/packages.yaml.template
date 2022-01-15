@@ -48,6 +48,7 @@ name: Build Python Packages
   push:
     tags:
       - "v*"
+  pull_request: {}
 
 jobs:
   check-workflow:
