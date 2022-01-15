@@ -34,7 +34,6 @@ setup(
     packages=['challenge_bypass_ristretto', 'challenge_bypass_ristretto.tests'],
     zip_safe=False,
     platforms='any',
-    setup_requires=['milksnake', 'setuptools_scm'],
     install_requires=['cffi', 'attrs'],
     extras_require={
         "tests": [

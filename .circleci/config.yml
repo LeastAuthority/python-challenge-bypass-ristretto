@@ -55,16 +55,13 @@ commands:
           command: |
             # Make sure we have a pip that's aware of Python version constraints
             << parameters.python >> -m pip install --upgrade pip
-            # Pre-install these two setup_depends using pip so we don't have
-            # to rely on whatever resolution logic setuptools would apply.
-            << parameters.python >> -m pip install --upgrade milksnake setuptools_scm
             # And get these so we can build, fix, and upload a wheel.
-            << parameters.python >> -m pip install wheel auditwheel twine
+            << parameters.python >> -m pip install build auditwheel twine
 
       - run:
           name: "Build Wheel"
           command: |
-            << parameters.python >> -m pip wheel --no-deps .
+            << parameters.python >> -m build
 
       - when:
           condition: << parameters.audit-wheel >>
@@ -75,12 +72,12 @@ commands:
                   # Since both macOS and Linux jobs re-use this step, make
                   # sure we only try to use auditwheel on the appropriate
                   # platform.  That is, only on Linux.
-                  << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+                  << parameters.python >> -m auditwheel repair dist/*.whl
                   # Delete the original, unfixed wheel.
-                  rm *.whl
+                  rm dist/*.whl
                   # Move the fixed wheel here for consistency with the
                   # non-manylinux case.
-                  mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
+                  mv wheelhouse/*.whl dist/
 
       - run:
           name: "Upload Wheel"
@@ -116,7 +113,7 @@ commands:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
-            << parameters.python >> -m twine upload --repository $repo python_challenge_bypass_ristretto*.whl
+            << parameters.python >> -m twine upload --repository $repo dist/*.whl
 
 # Define the actual jobs that will be available to run in a workflow.
 jobs:

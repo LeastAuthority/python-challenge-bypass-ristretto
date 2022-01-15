@@ -23,7 +23,7 @@ anchors:
   - &GET_PACKAGE_DEPENDENCIES
     name: "Get Packaging Dependencies"
     run: |
-      pip install wheel twine
+      pip install build twine
 
   - &UPLOAD_PACKAGES
     name: "Upload Packages"
@@ -33,12 +33,12 @@ anchors:
       # the project Settings page, find Secrets beneath it.
       TWINE_PASSWORD: "${{ secrets.exarkun_pypi_api_key }}"
     run: |
-      python -m twine upload --repository pypi dist/*
+      python -m twine upload --repository pypi dist/*.whl
 
-  - &BDIST_WHEEL
+  - &BUILD_WHEEL
     name: "Build Packages"
     run: |
-      python setup.py bdist_wheel
+      python -m build
 
 name: Build Python Packages
 
@@ -92,7 +92,7 @@ jobs:
     - *CHECKOUT
     - *FINISH_CHECKOUT
     - *GET_PACKAGE_DEPENDENCIES
-    - *BDIST_WHEEL
+    - *BUILD_WHEEL
     - *UPLOAD_PACKAGES
 
   manylinux2010-packages:
