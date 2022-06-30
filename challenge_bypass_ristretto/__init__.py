@@ -163,7 +163,7 @@ class VerificationSignature(_Serializable):
     _decoder = lib.verification_signature_decode_base64
 
 
-class RandomToken(_Serializable):
+class Token(_Serializable):
     _encoder = lib.token_encode_base64
     _decoder = lib.token_decode_base64
 
@@ -186,6 +186,10 @@ class RandomToken(_Serializable):
                 self._raw,
             ),
         )
+
+# Maintain backwards compatibility with the old, confusing name.  It is not a
+# "Random Token" it is a random "Token".
+RandomToken = Token
 
 
 class PublicKey(_Serializable):
