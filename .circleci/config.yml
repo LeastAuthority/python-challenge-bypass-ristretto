@@ -297,8 +297,6 @@ workflows:
             parameters:
               # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
               xcode-version:
-                # Latest macOS 10.14.x
-                - "11.1.0"
                 # Latest macOS 10.15.x
                 - "12.4.0"
                 # Latest macOS 11.x
