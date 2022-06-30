@@ -2,6 +2,9 @@
 
 set -euxo pipefail
 
+PYTHON=$1
+shift
+
 # On CI, explicitly pass a value for nixpkgs so that the build respects the
 # nixpkgs revision CI is trying to test.  Otherwise, accept the default
 # nixpkgs defined by the packaging expressions.
@@ -16,6 +19,7 @@ nix-build \
     -A tests \
     --out-link ffi-tests \
     "${pkgsArg[@]}" \
+    --argstr python "$PYTHON" \
     challenge-bypass-ristretto.nix
 
 # Build the Python package itself

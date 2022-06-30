@@ -167,6 +167,9 @@ jobs:
 
 
   tests-template: &TESTS
+    parameters:
+      python-version:
+        type: "string"
     docker:
       # Run in a highly Nix-capable environment.
       - image: "nixorg/nix:circleci"
@@ -244,7 +247,7 @@ jobs:
       - run:
           name: "Build and Test"
           command: |
-            ./ci-tools/run-tests.sh
+            ./ci-tools/run-tests.sh << parameters.python-version >>
 
   tests-2105:
     <<: *TESTS
@@ -260,8 +263,20 @@ workflows:
   version: 2
   all-tests:
     jobs:
-      - "tests-2105"
-      - "tests-2111"
+      - "tests-2105":
+          matrix:
+            parameters:
+              python-version:
+                - "python39"
+                - "python310"
+
+      - "tests-2111":
+          matrix:
+            parameters:
+              python-version:
+                - "python39"
+                - "python310"
+
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
           executor: "manylinux-2014-x86_64"
