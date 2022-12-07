@@ -46,7 +46,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in {
         pkgsCross.libchallenge_bypass_ristretto_ffi =
-          import ./challenge-bypass-ristretto.nix {
+          import ./libchallenge-bypass-ristretto-ffi.nix {
             inherit (pkgs) lib;
             pkgsForHost = pkgs.pkgsCross.${crossSystem};
             fenix = fenix.packages.${system};
