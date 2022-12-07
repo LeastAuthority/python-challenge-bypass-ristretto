@@ -43,22 +43,15 @@
       };
     in eachSystemAndCross (system: crossSystem:
       let
-        # A mapping from system names as understood by nixpkgs to system names as understood by the Rust toolchain.
-        _rustTargetTranslation = {
-          "aarch64-android"         = "aarch64-linux-android";
-          "armv7a-android-prebuilt" = "armv7-linux-androideabi";
-        };
-        toRustTarget = s: _rustTargetTranslation.${s};
-
         pkgs = nixpkgs.legacyPackages.${system};
       in {
         pkgsCross.libchallenge_bypass_ristretto_ffi =
           import ./challenge-bypass-ristretto.nix {
-            inherit pkgs crossSystem;
-            fenix = fenix.packages.${pkgs.stdenv.system};
-            naersk = naersk.lib.${pkgs.stdenv.system};
+            inherit (pkgs) lib;
+            pkgsForHost = pkgs.pkgsCross.${crossSystem};
+            fenix = fenix.packages.${system};
+            naersk = naersk.lib.${system};
             src = libchallenge_bypass_ristretto_ffi-src;
-            rustSystemTarget = toRustTarget crossSystem;
         };
 
         devShells.default = pkgs.mkShell {
