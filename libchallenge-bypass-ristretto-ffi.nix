@@ -23,11 +23,23 @@ let
   # though.
   crate = buildPackage {
     inherit src;
+    # If we are cross-compiling then tell the Rust toolchain about this fact.
+    # It would be more symmetric (and therefore better) if we could always
+    # cross-compile (even from a system to itself) but there are some quirks
+    # that prevent us from doing so (as of NixOS 22.11 / Rust 1.64).
 
-    # Tell cargo/rustc what system to build for.
+    # We need it to produce output suitable for the host system.  If we don't
+    # tell it this, it will produce output for the build system - which is
+    # fine in the native compilation case (it's what "native compilation"
+    # means, even).
+    #
+    # On quirk of cross-compilation is that we don't always know how to
+    # compute this string for the (build == host) case.
     CARGO_BUILD_TARGET = rustSystemTarget;
 
-    # And tell it what program to use to link for that system.
+    # It must also use the correct linker for the host system.  Another quirk
+    # of cross-compilation is that we don't always know how to tell Rust how
+    # to link correctly when (build == host).
     "CARGO_TARGET_${toEnvVar rustSystemTarget}_LINKER" = ld;
   };
 
