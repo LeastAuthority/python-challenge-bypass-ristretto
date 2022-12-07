@@ -54,6 +54,11 @@
             src = libchallenge_bypass_ristretto_ffi-src;
           };
 
+        python-challenge-bypass-ristretto =
+          pkgs.python3.pkgs.callPackage ./python-challenge-bypass-ristretto.nix {
+            inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
+          };
+
         pkgsCross.libchallenge_bypass_ristretto_ffi =
           import ./libchallenge-bypass-ristretto-ffi.nix {
             inherit (pkgs) lib;
