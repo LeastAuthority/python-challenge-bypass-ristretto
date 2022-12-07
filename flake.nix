@@ -54,7 +54,9 @@
       in {
         pkgsCross.libchallenge_bypass_ristretto_ffi =
           import ./challenge-bypass-ristretto.nix {
-            inherit pkgs system fenix naersk crossSystem;
+            inherit pkgs crossSystem;
+            fenix = fenix.packages.${pkgs.stdenv.system};
+            naersk = naersk.lib.${pkgs.stdenv.system};
             src = libchallenge_bypass_ristretto_ffi-src;
             rustSystemTarget = toRustTarget crossSystem;
         };

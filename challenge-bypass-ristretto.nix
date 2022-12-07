@@ -1,5 +1,4 @@
 { pkgs
-, system
 , crossSystem
 , rustSystemTarget
 , fenix
@@ -26,13 +25,13 @@ let
   pname = "libchallenge_bypass_ristretto_ffi";
   version = "1.0.0-pre3";
 
-  toolchain = with fenix.packages.${system}; combine [
+  toolchain = with fenix; combine [
     minimal.cargo
     minimal.rustc
     targets.${rustSystemTarget}.latest.rust-std
   ];
 
-  buildPackage = (naersk.lib.${system}.override {
+  buildPackage = (naersk.override {
     cargo = toolchain;
     rustc = toolchain;
   }).buildPackage;
