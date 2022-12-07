@@ -38,27 +38,31 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
       in {
-        libchallenge_bypass_ristretto_ffi =
-          import ./nix/libchallenge-bypass-ristretto-ffi.nix {
-            inherit (pkgs) lib;
-            pkgsForHost = pkgs;
-            fenix = fenix.packages.${system};
-            naersk = naersk.lib.${system};
-            src = libchallenge_bypass_ristretto_ffi-src;
-          };
+        packages = {
+          libchallenge_bypass_ristretto_ffi =
+            import ./nix/libchallenge-bypass-ristretto-ffi.nix {
+              inherit (pkgs) lib;
+              pkgsForHost = pkgs;
+              fenix = fenix.packages.${system};
+              naersk = naersk.lib.${system};
+              src = libchallenge_bypass_ristretto_ffi-src;
+            };
 
-        python-challenge-bypass-ristretto =
-          pkgs.python3.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
-            inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
-          };
+          python-challenge-bypass-ristretto =
+            pkgs.python3.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
+              inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
+            };
+        };
 
-        pkgsCross.libchallenge_bypass_ristretto_ffi =
-          import ./nix/libchallenge-bypass-ristretto-ffi.nix {
-            inherit (pkgs) lib;
-            pkgsForHost = pkgs.pkgsCross.${crossSystem};
-            fenix = fenix.packages.${system};
-            naersk = naersk.lib.${system};
-            src = libchallenge_bypass_ristretto_ffi-src;
+        pkgsCross = {
+          libchallenge_bypass_ristretto_ffi =
+            import ./nix/libchallenge-bypass-ristretto-ffi.nix {
+              inherit (pkgs) lib;
+              pkgsForHost = pkgs.pkgsCross.${crossSystem};
+              fenix = fenix.packages.${system};
+              naersk = naersk.lib.${system};
+              src = libchallenge_bypass_ristretto_ffi-src;
+            };
         };
 
         devShells.default = pkgs.mkShell {

@@ -18,13 +18,23 @@ builder:
 let
   f = { system, crossSystem }:
     let
-      packages = builder system crossSystem;
-    in {
-      legacyPackages.${system} = packages // (
-        if packages ? pkgsCross
-        then { pkgsCross.${crossSystem} = packages.pkgsCross; }
+      buildResult = builder system crossSystem;
+    in rec {
+      legacyPackages.${system} = buildResult.packages // (
+        if buildResult ? pkgsCross
+        then { pkgsCross.${crossSystem} = buildResult.pkgsCross; }
         else {}
       );
+
+      # Nesting beneath packages makes `nix flake ...` commands angry.  Only
+      # put the plain derivations here.
+      packages.${system} =
+        lib.filterAttrs (k: v: lib.isDerivation v) (legacyPackages.${system});
+
+      # And propagate any devShells defined, ignoring crossSystem because it
+      # doesn't make sense for devShells I guess?
+      devShells.${system} =
+        lib.optionalAttrs (buildResult ? devShells) buildResult.devShells;
     };
 
   args = lib.cartesianProductOfSets {
