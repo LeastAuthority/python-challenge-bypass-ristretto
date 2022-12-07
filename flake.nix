@@ -26,6 +26,9 @@
     let
       eachSystemAndCross = import ./nix/each-system-and-cross.nix {
         inherit (nixpkgs) lib;
+        buildSystems = [
+          "x86_64-linux"
+        ];
         crossSystems = [
           "aarch64-android"
           "armv7a-android-prebuilt"
