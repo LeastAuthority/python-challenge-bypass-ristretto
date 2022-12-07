@@ -5,7 +5,7 @@ pythonPackages.buildPythonPackage rec {
   version = "2022.6.30";
   pname = "python-challenge-bypass-ristretto";
   name = "${pname}-${version}";
-  src = ./.;
+  src = ../.;
 
   # We hack up setup.py a bit.  We're going to supply a pre-built Ristretto
   # FFI library.  We don't want Python distutils to build it for us.  This

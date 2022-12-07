@@ -88,30 +88,13 @@
         "type": "github"
       }
     },
-    "obelisk-src": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1667395970,
-        "narHash": "sha256-L0V4zhZ7DIoVhlPd/olcv2hTFovmjRXHKd8Of6L8dxE=",
-        "owner": "obsidiansystems",
-        "repo": "obelisk",
-        "rev": "41f97410cfa2e22a4ed9e9344abcd58bbe0f3287",
-        "type": "github"
-      },
-      "original": {
-        "owner": "obsidiansystems",
-        "repo": "obelisk",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "fenix": "fenix",
         "flake-utils": "flake-utils",
         "libchallenge_bypass_ristretto_ffi-src": "libchallenge_bypass_ristretto_ffi-src",
         "naersk": "naersk",
-        "nixpkgs": "nixpkgs",
-        "obelisk-src": "obelisk-src"
+        "nixpkgs": "nixpkgs"
       }
     },
     "rust-analyzer-src": {

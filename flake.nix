@@ -6,10 +6,6 @@
     flake-utils = {
       url = "github:numtide/flake-utils";
     };
-    obelisk-src = {
-      url = "github:obsidiansystems/obelisk";
-      flake = false;
-    };
     libchallenge_bypass_ristretto_ffi-src = {
       url = "github:brave-intl/challenge-bypass-ristretto-ffi";
       flake = false;
@@ -27,13 +23,12 @@
     { self
     , nixpkgs
     , flake-utils
-    , obelisk-src
     , libchallenge_bypass_ristretto_ffi-src
     , fenix
     , naersk
     }:
     let
-      eachSystemAndCross = import ./each-system-and-cross.nix {
+      eachSystemAndCross = import ./nix/each-system-and-cross.nix {
         inherit flake-utils;
         inherit (nixpkgs) lib;
         crossSystems = [
@@ -46,7 +41,7 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in {
         libchallenge_bypass_ristretto_ffi =
-          import ./libchallenge-bypass-ristretto-ffi.nix {
+          import ./nix/libchallenge-bypass-ristretto-ffi.nix {
             inherit (pkgs) lib;
             pkgsForHost = pkgs;
             fenix = fenix.packages.${system};
@@ -55,12 +50,12 @@
           };
 
         python-challenge-bypass-ristretto =
-          pkgs.python3.pkgs.callPackage ./python-challenge-bypass-ristretto.nix {
+          pkgs.python3.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
             inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
           };
 
         pkgsCross.libchallenge_bypass_ristretto_ffi =
-          import ./libchallenge-bypass-ristretto-ffi.nix {
+          import ./nix/libchallenge-bypass-ristretto-ffi.nix {
             inherit (pkgs) lib;
             pkgsForHost = pkgs.pkgsCross.${crossSystem};
             fenix = fenix.packages.${system};
@@ -69,15 +64,28 @@
         };
 
         devShells.default = pkgs.mkShell {
-          buildInputs = [
-            (pkgs.callPackage obelisk-src { }).command
+          buildInputs = with pkgs; [
+            (python3.withPackages (ps: with ps; [
+              # TODO: Deduplicate this list / the list in the package definition
+              cffi
+              attrs
+
+              wheel
+              setuptools
+              setuptools_scm
+              milksnake
+
+              testtools
+              hypothesis
+            ]))
           ];
 
-          nativeBuildInputs = [
-            pkgs.cabal-install
-            pkgs.ghc
-            pkgs.pkgconfig
-            self.packages.${system}.pkgsCross.aarch64-android.libchallenge_bypass_ristretto_ffi
+          nativeBuildInputs = with pkgs; [
+            cabal-install
+            ghc
+            pkgconfig
+
+            self.packages.${system}.libchallenge_bypass_ristretto_ffi
           ];
         };
       });
