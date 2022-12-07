@@ -1,6 +1,6 @@
 from setuptools import setup
 
-_DYLIB_NAME = 'challenge_bypass_ristretto'
+_DYLIB_NAME = 'challenge_bypass_ristretto_ffi'
 
 def build_native(spec):
     # build rust library

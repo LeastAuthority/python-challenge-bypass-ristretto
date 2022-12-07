@@ -15,7 +15,6 @@ pythonPackages.buildPythonPackage rec {
   substituteInPlace $sourceRoot/setup.py \
       --replace "['cargo', 'build', '--release']" "['sh', '-c', ':']" \
       --replace "./challenge-bypass-ristretto-ffi" "/" \
-      --replace "_DYLIB_NAME = 'challenge_bypass_ristretto'" "_DYLIB_NAME = 'challenge_bypass_ristretto_ffi'" \
       --replace "target/release" "${libchallenge_bypass_ristretto_ffi}/lib" \
       --replace "./src" "${libchallenge_bypass_ristretto_ffi.src}/src" \
       --replace "'setuptools_scm'" ""
