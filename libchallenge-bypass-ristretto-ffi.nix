@@ -54,6 +54,11 @@ let
     "armv7a-unknown-linux-androideabi" = "armv7-linux-androideabi";
   }).${s};
 
+  # Notice whether we are cross-compiling or not.  There are some asymmetries
+  # between native compilation and cross-compilation which need special
+  # handling and this lets us know whether to apply that handling or not.
+  isCrossCompiling = pkgsForHost.buildPlatform != pkgsForHost.hostPlatform;
+
   # Convert a string that represents a Cargo system "target" into a form where
   # it can be interpolated into an environment variable for Cargo that tells
   # Cargo which linker to use.  For example::
