@@ -21,8 +21,9 @@ let
   # have to massage the package a bit to get the right pieces in the right
   # place.  All of the compilation (maybe cross-compilation) happens here
   # though.
-  crate = buildPackage {
+  crate = buildPackage ({
     inherit src;
+  } // {
     # If we are cross-compiling then tell the Rust toolchain about this fact.
     # It would be more symmetric (and therefore better) if we could always
     # cross-compile (even from a system to itself) but there are some quirks
@@ -41,7 +42,7 @@ let
     # of cross-compilation is that we don't always know how to tell Rust how
     # to link correctly when (build == host).
     "CARGO_TARGET_${toEnvVar rustSystemTarget}_LINKER" = ld;
-  };
+  });
 
   # The system to tell cargo/rustc to build for.  Rust calls this the
   # "target".  autotools and nixpkgs call it the "host".
