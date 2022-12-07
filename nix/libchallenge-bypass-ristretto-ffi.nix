@@ -13,7 +13,7 @@ let
 
   # Metadata for the package.
   pname = "libchallenge_bypass_ristretto_ffi";
-  version = "1.0.0-pre3";
+  version = "1.0.1";
 
   # The basic Rust crate for libchallenge-bypass-ristretto-ffi.  This is not
   # enough by itself because the purpose of this -ffi package is to expose a C
