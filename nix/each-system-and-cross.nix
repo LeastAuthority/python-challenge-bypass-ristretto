@@ -18,9 +18,10 @@
 #     A collection of named packages.
 #
 #   CrossPackageSet = AttrSet
-#     { packages  :: PackageSet
-#     , pkgsCross :: PackageSet
+#     { pkgsCross :: PackageSet
+#     , packages  :: PackageSet
 #     , devShells :: PackageSet
+#     , checks    :: PackageSet
 #     }
 #
 # and a builder function::
@@ -39,14 +40,11 @@
 # which defines cross-compiled packages for i686-linux, aarch64-linux, and
 # riscv-linux for an x86_64-linux build system.
 #
-# Derivations in the `packages` attribute in the return value of `f` will be
-# present as normal, native-compilation `packages` in the output.
-#
 # Derivations in the `pkgsCross` attribute in the return value of `f` will be
 # exposed via `legacyPackages` beneath `pkgsCross.${crossSystem}`.
 #
-# Derivations in the `devShells` attribute in the return value of `f` will be
-# present as normal, native-compilation `devShells` in the output.
+# Derivations in `packages`, `devShells`, and `checks` will be exposed in the
+# appropriate place as normal, native-compiled packages.
 {
 # the nixpkgs library
   lib
@@ -85,6 +83,9 @@ let
       # doesn't make sense for devShells I guess?
       devShells.${system} =
         lib.optionalAttrs (buildResult ? devShells) buildResult.devShells;
+
+      # Likewise for checks.
+      checks.${system} = lib.optionalAttrs (buildResult ? checks) buildResult.checks;
     };
 
   args = lib.cartesianProductOfSets {
