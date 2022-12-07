@@ -93,11 +93,6 @@ Cflags: -I$out/include
 EOF
 '';
 
-  clangSystemQuad = ({
-    "aarch64-linux-android" = "aarch64-unknown-linux-android";
-    "armv7-linux-androideabi" = "foo";
-  }).${rustSystemTarget};
-
-  ld = "${pkgsForHost.stdenv.cc}/bin/${clangSystemQuad}-ld";
+  ld = "${pkgsForHost.stdenv.cc}/bin/${pkgsForHost.stdenv.hostPlatform.config}-ld";
 in
 libchallenge_bypass_ristretto_ffi
