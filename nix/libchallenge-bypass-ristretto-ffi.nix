@@ -11,10 +11,6 @@ let
     inherit postInstall;
   });
 
-  # Metadata for the package.
-  pname = "libchallenge_bypass_ristretto_ffi";
-  version = "1.0.1";
-
   # The basic Rust crate for libchallenge-bypass-ristretto-ffi.  This is not
   # enough by itself because the purpose of this -ffi package is to expose a C
   # API and ABI.  Crates typically don't do that so after Cargo is done we
@@ -93,26 +89,31 @@ let
 
     cp target/${
       lib.optionalString isCrossCompiling (rustSystemTarget + "/")
-    }release/${pname}.so $out/lib
+    }release/lib${libname}.so $out/lib
 
     # Provide a pkgconfig file so build systems can find the header and library.
     mkdir -p $out/lib/pkgconfig
-    cat > $out/lib/pkgconfig/${pname}.pc <<EOF
+    cat > $out/lib/pkgconfig/lib${libname}.pc <<EOF
 prefix=$out
 exec_prefix=$out
 libdir=$out/lib
 sharedlibdir=$out/lib
 includedir=$out/include
 
-Name: ${pname}
+Name: lib${libname}
 Description: Ristretto-Flavored PrivacyPass library
 Version: ${version}
 
 Requires:
-Libs: -L$out/lib -lchallenge_bypass_ristretto_ffi
+Libs: -L$out/lib -l${libname}
 Cflags: -I$out/include
 EOF
 '';
+
+  version = crate.version;
+  pname = with builtins;
+    substring 0 (stringLength crate.name - stringLength version - 1) crate.name;
+  libname = "${lib.replaceChars ["-"] ["_"] pname}";
 
   ld = "${pkgsForHost.stdenv.cc}/bin/${pkgsForHost.stdenv.hostPlatform.config}-ld";
 in
