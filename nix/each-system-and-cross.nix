@@ -1,12 +1,9 @@
 {
   lib
 
-# A helper for evaluating the builder against a number of build systems.
-, flake-utils
-
 # A list of nixpkgs system identifiers as strings (tuples, triples, maybe
 # quads, who knows) for which builds will be defined.
-, buildSystems ? [ "x86_64-linux" ] # flake-utils.lib.defaultSystems
+, buildSystems ? [ "x86_64-linux" ]
 
 # A list of nixpkgs system identifiers as strings (tuples, triples, maybe
 # quads, who knows) for which to define cross-compiled packages.

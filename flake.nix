@@ -3,9 +3,6 @@
     nixpkgs = {
       url = "github:nixos/nixpkgs?ref=nixos-22.11";
     };
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-    };
     libchallenge_bypass_ristretto_ffi-src = {
       url = "github:brave-intl/challenge-bypass-ristretto-ffi";
       flake = false;
@@ -22,14 +19,12 @@
   outputs =
     { self
     , nixpkgs
-    , flake-utils
     , libchallenge_bypass_ristretto_ffi-src
     , fenix
     , naersk
     }:
     let
       eachSystemAndCross = import ./nix/each-system-and-cross.nix {
-        inherit flake-utils;
         inherit (nixpkgs) lib;
         crossSystems = [
           "aarch64-android"
