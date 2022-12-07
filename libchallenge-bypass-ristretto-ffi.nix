@@ -53,6 +53,7 @@ let
   toRustTarget = s: ({
     "aarch64-unknown-linux-android"    = "aarch64-linux-android";
     "armv7a-unknown-linux-androideabi" = "armv7-linux-androideabi";
+    "x86_64-unknown-linux-gnu"         = "x86_64-unknown-linux-gnu";
   }).${s};
 
   # Notice whether we are cross-compiling or not.  There are some asymmetries
@@ -90,7 +91,9 @@ let
     mkdir -p $out/include $out/lib
     cp src/lib.h $out/include/
 
-    cp target/${rustSystemTarget}/release/${pname}.so $out/lib
+    cp target/${
+      lib.optionalString isCrossCompiling (rustSystemTarget + "/")
+    }release/${pname}.so $out/lib
 
     # Provide a pkgconfig file so build systems can find the header and library.
     mkdir -p $out/lib/pkgconfig
