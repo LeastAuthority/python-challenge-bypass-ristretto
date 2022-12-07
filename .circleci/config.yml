@@ -166,114 +166,59 @@ jobs:
           audit-wheel: false
 
 
-  tests-template: &TESTS
+  tests:
     parameters:
       python-version:
         type: "string"
     docker:
       # Run in a highly Nix-capable environment.
-      - image: "nixorg/nix:circleci"
+      - image: "nixos/nix:2.9.2"
 
     environment:
-      # Specify a revision of NixOS/nixpkgs to run against.  This essentially
-      # pins the majority of the software involved in the build.  This
-      # revision is selected arbitrarily.  It's somewhat current as of the
-      # time of this comment.  We can bump it to a newer version when that
-      # makes sense.  Meanwhile, the platform won't shift around beneath us
-      # unexpectedly.
-      NIXPKGS_REV: "XXX" # Set this in a derived environment.
+      # Let us use features marked "experimental".  For example, most/all of
+      # the `nix <subcommand>` forms.
+      NIX_CONFIG: "experimental-features = nix-command flakes"
+
+      # Pin a NixOS 21.11 revision.  Most of the software involved in the
+      # build process is pinned by nix/sources.json with niv but a few things
+      # need to work before we get that far.  This pin is for those things.
+      # This pin has no particular bearing on what version of our dependencies
+      # we are testing against, what version of Python we support, etc.  It is
+      # part of CI infrastructure.
+      NIXPKGS: "https://github.com/NixOS/nixpkgs/archive/28abc4e43a24d28729509e2d83f5c4f3b3418189.tar.gz"
+
+      # CACHIX_AUTH_TOKEN is manually set in the CircleCI web UI and allows us
+      # to push to CACHIX_NAME.
+      CACHIX_NAME: "privatestorage-opensource"
 
     steps:
-      - run:
-          # Get NIX_PATH set for the rest of the job so that the revision of
-          # nixpkgs we selected will be used everywhere Nix pulls in software.
-          # There is no way to set an environment variable containing the
-          # value of another environment variable on CircleCI except to use
-          # the `BASE_ENV` feature as we do here.
-          name: "Setup NIX_PATH Environment Variable"
+      - run: &SETUP_CACHIX
+          name: "Set up Cachix"
           command: |
-            echo "export NIX_PATH=nixpkgs=https://github.com/NixOS/nixpkgs/archive/$NIXPKGS_REV.tar.gz" >> $BASH_ENV
+            # Install cachix, the Nix-friendly caching tool.
+            nix-env -f $NIXPKGS -iA cachix bash
+            # Activate it for "binary substitution".  This sets up
+            # configuration that lets Nix download something from the cache
+            # instead of building it locally, if possible.
+            cachix use "${CACHIX_NAME}"
 
       # Get *our* source code.
       - "checkout"
-      - run:
-          # And the rest of it.
-          name: "Finish checking out source"
-          command: |
-            git submodule init
-            git submodule update
-
-      - "run":
-          # CircleCI won't let us interpolate NIXPKGS_REV into a cache key.
-          # Only CircleCI's own environment variables or variables set via the
-          # web interface in a "context" can be interpolated into cache keys.
-          # However, we can interpolate the checksum of a file...  Since we
-          # don't care about the exact revision, we just care that a new
-          # revision gives us a new string, we can write the revision to a
-          # file and then put the checksum of that file into the cache key.
-          # This way, we don't have to maintain the nixpkgs revision in two
-          # places and risk having them desynchronize.
-          name: "Prepare For Cache Key"
-          command: |
-            echo "${NIXPKGS_REV}" > nixpkgs.rev
-
-      - restore_cache:
-          # Get all of Nix's state relating to the particular revision of
-          # nixpkgs we're using.  It will always be the same.  CircleCI
-          # artifacts and nixpkgs store objects are probably mostly hosted in
-          # the same place (S3) so there's not a lot of difference for
-          # anything that's pre-built.  For anything we end up building
-          # ourselves, though, this saves us all of the build time (less the
-          # download time).
-          #
-          # Read about caching dependencies: https://circleci.com/docs/2.0/caching/
-          name: "Restore Nix Store Paths"
-          keys:
-            # Construct cache keys that allow sharing as long as nixpkgs
-            # revision is unchanged.
-            #
-            # If nixpkgs changes then potentially a lot of cached packages for
-            # the base system will be invalidated so we may as well drop them
-            # and make a new cache with the new packages.
-            - nix-store-v1-{{ checksum "nixpkgs.rev" }}
-            - nix-store-v1-
-
-      - save_cache:
-          name: "Cache Nix Store Paths"
-          key: nix-store-v1-{{ checksum "nixpkgs.rev" }}
-          paths:
-            - "/nix"
 
       - run:
           name: "Build and Test"
           command: |
             ./ci-tools/run-tests.sh << parameters.python-version >>
 
-  tests-2105:
-    <<: *TESTS
-    environment:
-      NIXPKGS_REV: "21.05"
-
-  tests-2111:
-    <<: *TESTS
-    environment:
-      NIXPKGS_REV: "21.11"
-
 workflows:
   version: 2
   all-tests:
     jobs:
-      - "tests-2105":
+      - "tests":
           matrix:
             parameters:
               python-version:
-                - "python39"
-                - "python310"
-
-      - "tests-2111":
-          matrix:
-            parameters:
-              python-version:
+                - "python38"
                 - "python39"
                 - "python310"
 

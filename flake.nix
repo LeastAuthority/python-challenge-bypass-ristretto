@@ -48,8 +48,16 @@
               src = libchallenge_bypass_ristretto_ffi-src;
             };
 
-          python-challenge-bypass-ristretto =
-            pkgs.python3.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
+          python38-challenge-bypass-ristretto =
+            pkgs.python38.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
+              inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
+            };
+          python39-challenge-bypass-ristretto =
+            pkgs.python39.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
+              inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
+            };
+          python310-challenge-bypass-ristretto =
+            pkgs.python310.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
               inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
             };
         };
