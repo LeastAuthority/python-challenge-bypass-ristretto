@@ -540,15 +540,14 @@ class VerificationKeyTests(TestCase):
     @given(signing_keys(), random_tokens())
     def test_non_utf8_message(self, signing_key, token):
         """
-        ``VerificationKey.sign_sha521`` raises an exception when passed a message
-        which is not a UTF-8-encoded byte string.
+        ``VerificationKey.sign_sha521`` returns a signature even when
+        passed a byte string message which does not represent the UTF-8
+        encoding of any text.
         """
         key = get_verify_key(signing_key, token)
-        self.assertThat(
-            lambda: key.sign_sha512(u"\N{SNOWMAN}".encode("utf-8")[:-1]),
-            raises(KeyException),
-        )
-
+        message = u"\N{SNOWMAN}".encode("utf-8")[:-1]
+        sig = key.sign_sha512(message)
+        self.assertThat(key.invalid_sha512(sig, message), Equals(False))
 
 
 class VerificationSignatureTests(TestCase):

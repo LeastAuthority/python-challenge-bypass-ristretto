@@ -56,7 +56,7 @@ class _Serializable(object):
 
     @classmethod
     def decode_base64(cls, text):
-        decoded = cls._decoder(text)
+        decoded = cls._decoder(text, len(text))
         if decoded == ffi.NULL:
             raise DecodeException()
         return cls(decoded)
@@ -142,6 +142,7 @@ class VerificationKey(object):
                 lib.verification_key_sign_sha512,
                 self._raw,
                 message,
+                len(message),
             ),
         )
 
@@ -153,6 +154,7 @@ class VerificationKey(object):
             self._raw,
             signature._raw,
             message,
+            len(message),
         )
         assert result in (0, 1)
         return bool(result)
