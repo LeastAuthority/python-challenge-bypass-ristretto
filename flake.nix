@@ -37,6 +37,9 @@
     in eachSystemAndCross (system: crossSystem:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        py-module = ps: ps.callPackage ./nix/python-challenge-bypass-ristretto.nix {
+          inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
+        };
       in {
         packages = {
           libchallenge_bypass_ristretto_ffi =
@@ -48,18 +51,9 @@
               src = libchallenge_bypass_ristretto_ffi-src;
             };
 
-          python38-challenge-bypass-ristretto =
-            pkgs.python38.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
-              inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
-            };
-          python39-challenge-bypass-ristretto =
-            pkgs.python39.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
-              inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
-            };
-          python310-challenge-bypass-ristretto =
-            pkgs.python310.pkgs.callPackage ./nix/python-challenge-bypass-ristretto.nix {
-              inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
-            };
+          python38-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
+          python39-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
+          python310-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
         };
 
         pkgsCross = {
@@ -73,13 +67,22 @@
             };
         };
 
-        checks = {
-          # Verify that we are supplying the dynamic libraries in a
-          # discoverable way.
-          pkgconfig-discovery =
-            let
-              lib = self.packages.${system}.libchallenge_bypass_ristretto_ffi;
-            in
+        checks =
+          let
+            lib = self.packages.${system}.libchallenge_bypass_ristretto_ffi;
+            py-env = pkgs.python3.withPackages (ps: [ (py-module ps) ]);
+          in {
+            # Run a little integration test that exercises the underlying
+            # library via the Python interface.
+            integration =
+              pkgs.runCommand
+                "${lib.name}-integration"
+                { }
+                "${py-env}/bin/python ${./spike.py} > $out";
+
+            # Verify that we are supplying the dynamic libraries in a
+            # discoverable way.
+            pkgconfig-discovery =
               pkgs.runCommand "${lib.name}-tests" {
                 nativeBuildInputs = [
                   # Putting pkg-config here causes the hooks that set
