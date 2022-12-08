@@ -81,6 +81,12 @@
             integration39 = integration pkgs.python39;
             integration310 = integration pkgs.python310;
 
+            # The library should have the correct soname.
+            soname = pkgs.runCommand "${lib.name}-soname" { } ''
+            ${pkgs.gcc}/bin/readelf -d ${lib}/lib/libchallenge_bypass_ristretto_ffi.so > $out
+            grep -E 'Library soname: \[libchallenge_bypass_ristretto_ffi\.so\]' $out
+            '';
+
             # Verify that we are supplying the dynamic libraries in a
             # discoverable way.
             pkgconfig-discovery =
@@ -92,7 +98,6 @@
                   lib
                 ];
               } ''
-
 # Be explicit about the name we're using here.  This is part of the project's
 # public interface.  We don't want it changing unintentionally.
 NAME=libchallenge_bypass_ristretto_ffi

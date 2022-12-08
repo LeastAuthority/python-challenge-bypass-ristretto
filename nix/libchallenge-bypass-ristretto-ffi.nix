@@ -31,7 +31,7 @@ let
 
     # Convince the linker to put a SONAME in the dynamic object.
     CARGO_BUILD_RUSTFLAGS =
-      "-C link-arg=${setSONAME "challenge_bypass_ristretto_ffi.so.${majorVersion}"}";
+      "-C link-arg=${setSONAME "lib${libname}.so"}";
 
   } // (lib.optionalAttrs isCrossCompiling {
     # If we are cross-compiling then tell the Rust toolchain about this fact.
@@ -44,7 +44,7 @@ let
     # fine in the native compilation case (it's what "native compilation"
     # means, even).
     #
-    # On quirk of cross-compilation is that we don't always know how to
+    # One quirk of cross-compilation is that we don't always know how to
     # compute this string for the (build == host) case.
     CARGO_BUILD_TARGET = rustSystemTarget;
 
