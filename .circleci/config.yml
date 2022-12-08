@@ -206,10 +206,16 @@ jobs:
       - "checkout"
 
       - run:
-          name: "Build and Test"
+          name: "Build"
           command: |
             cachix watch-exec "${CACHIX_NAME}" -- \
-              ./ci-tools/run-tests.sh << parameters.python-version >>
+              nix build ".#<< parameters.python-version >>-challenge-bypass-ristretto"
+
+      - run:
+          name: "Check"
+          command: |
+            cachix watch-exec "${CACHIX_NAME}" -- \
+              nix flake check
 
 workflows:
   version: 2

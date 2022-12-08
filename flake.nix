@@ -70,15 +70,18 @@
         checks =
           let
             lib = self.packages.${system}.libchallenge_bypass_ristretto_ffi;
-            py-env = pkgs.python3.withPackages (ps: [ (py-module ps) ]);
+            py-env = py: py.withPackages (ps: [ (py-module ps) ]);
+            integration = py: pkgs.runCommand
+              "${lib.name}-integration"
+              { }
+              "${py-env py}/bin/python ${./spike.py} > $out";
+
           in {
             # Run a little integration test that exercises the underlying
             # library via the Python interface.
-            integration =
-              pkgs.runCommand
-                "${lib.name}-integration"
-                { }
-                "${py-env}/bin/python ${./spike.py} > $out";
+            integration38 = integration pkgs.python38;
+            integration39 = integration pkgs.python39;
+            integration310 = integration pkgs.python310;
 
             # Verify that we are supplying the dynamic libraries in a
             # discoverable way.
