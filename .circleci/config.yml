@@ -208,7 +208,8 @@ jobs:
       - run:
           name: "Build and Test"
           command: |
-            ./ci-tools/run-tests.sh << parameters.python-version >>
+            cachix watch-exec "${CACHIX_NAME}" -- \
+              ./ci-tools/run-tests.sh << parameters.python-version >>
 
 workflows:
   version: 2
