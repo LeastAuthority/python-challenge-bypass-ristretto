@@ -240,6 +240,12 @@ jobs:
 
     steps:
       - run:
+          <<: *SETUP_CACHIX
+
+      # Get *our* source code.
+      - "checkout"
+
+      - run:
           name: "Check"
           command: |
             cachix watch-exec "${CACHIX_NAME}" -- \
