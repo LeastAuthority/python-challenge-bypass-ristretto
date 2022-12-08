@@ -244,9 +244,11 @@ workflows:
               # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
               xcode-version:
                 # Latest macOS 10.15.x
-                - "12.4.0"
+                - "11.7.0"
                 # Latest macOS 11.x
                 - "13.2.1"
+                # A macOS 12.x
+                - "14.1.0"
           filters:
             # CircleCI does not run workflows for tags unless you explicitly
             # specify tag filters. Additionally, if a job requires any other
