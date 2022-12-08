@@ -166,10 +166,7 @@ jobs:
           audit-wheel: false
 
 
-  tests:
-    parameters:
-      python-version:
-        type: "string"
+  nix-template: &NIX_TEMPLATE
     docker:
       # Run in a highly Nix-capable environment.
       - image: "nixos/nix:2.9.2"
@@ -202,6 +199,17 @@ jobs:
             # instead of building it locally, if possible.
             cachix use "${CACHIX_NAME}"
 
+  build-native:
+    <<: *NIX_TEMPLATE
+
+    parameters:
+      python-version:
+        type: "string"
+
+    steps:
+      - run:
+          <<: *SETUP_CACHIX
+
       # Get *our* source code.
       - "checkout"
 
@@ -211,17 +219,40 @@ jobs:
             cachix watch-exec "${CACHIX_NAME}" -- \
               nix build ".#<< parameters.python-version >>-challenge-bypass-ristretto"
 
+  build-aarch64-android:
+    <<: *NIX_TEMPLATE
+
+    steps:
+      - run:
+          <<: *SETUP_CACHIX
+
+      # Get *our* source code.
+      - "checkout"
+
+      - run:
+          name: "Cross-Build"
+          command: |
+            cachix watch-exec "${CACHIX_NAME}" -- \
+              nix build '.#pkgsCross.aarch64-android.libchallenge_bypass_ristretto_ffi'
+
+  check:
+    <<: *NIX_TEMPLATE
+
+    steps:
       - run:
           name: "Check"
           command: |
             cachix watch-exec "${CACHIX_NAME}" -- \
               nix flake check
 
+
 workflows:
   version: 2
   all-tests:
     jobs:
-      - "tests":
+      - "check"
+      - "build-aarch64-android"
+      - "build-native":
           matrix:
             parameters:
               python-version:
