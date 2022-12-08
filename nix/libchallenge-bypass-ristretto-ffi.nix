@@ -28,6 +28,11 @@ let
   # though.
   crate = buildPackage ({
     inherit src;
+
+    # Convince the linker to put a SONAME in the dynamic object.
+    CARGO_BUILD_RUSTFLAGS =
+      "-C link-arg=${setSONAME "challenge_bypass_ristretto_ffi.so.${majorVersion}"}";
+
   } // (lib.optionalAttrs isCrossCompiling {
     # If we are cross-compiling then tell the Rust toolchain about this fact.
     # It would be more symmetric (and therefore better) if we could always
@@ -65,6 +70,15 @@ let
   # between native compilation and cross-compilation which need special
   # handling and this lets us know whether to apply that handling or not.
   isCrossCompiling = pkgs.buildPlatform != pkgs.hostPlatform;
+
+  # Compute a Cargo "link-arg" value which will cause the linker to set the
+  # given name as a SONAME in the resulting object.
+  #
+  # string -> string
+  setSONAME = name: {
+    "lld" = "--soname=${name}";
+    "bfd" = "-Wl,-soname,${name}";
+  }.${pkgs.stdenv.hostPlatform.linker};
 
   # Convert a string that represents a Cargo system "target" into a form where
   # it can be interpolated into an environment variable for Cargo that tells
@@ -123,6 +137,10 @@ EOF
   # naersk, thanks).  We get the package version and name and then
   # post-process the name a bit for a couple different purposes.
   version = crate.version;
+
+  # Suppose that version is semantic and pull off the major so we can put it
+  # in the SONAME of the shared object.
+  majorVersion = builtins.head (lib.splitString "." version);
 
   # Since name is like "libfoo-version", we can compute the conventional
   # "pname" by slicing the "-version" suffix off.
