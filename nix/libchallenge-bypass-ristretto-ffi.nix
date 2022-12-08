@@ -1,7 +1,16 @@
-{ lib
-, pkgsForHost
+# A function to create a derivation for the libchallenge_bypass_ristretto_ffi
+# library wrapping the challenge-bypass-ristretto-ffi Rust crate.
+{
+  # An instance of nixpkgs
+  pkgs
+
+# The nix-community/fenix packages suitable for use on the build system.
 , fenix
+
+# The nix-community/naersk packages suitable for use on the build system.
 , naersk
+
+# The challenge-bypass-ristretto-ffi source to build and package.
 , src
 }:
 let
@@ -42,7 +51,7 @@ let
 
   # The system to tell cargo/rustc to build for.  Rust calls this the
   # "target".  autotools and nixpkgs call it the "host".
-  rustSystemTarget = toRustTarget pkgsForHost.stdenv.hostPlatform.config;
+  rustSystemTarget = toRustTarget pkgs.stdenv.hostPlatform.config;
 
   # Map from system quads as known to nixpkgs to system names as understood by
   # the Rust toolchain.
@@ -55,7 +64,7 @@ let
   # Notice whether we are cross-compiling or not.  There are some asymmetries
   # between native compilation and cross-compilation which need special
   # handling and this lets us know whether to apply that handling or not.
-  isCrossCompiling = pkgsForHost.buildPlatform != pkgsForHost.hostPlatform;
+  isCrossCompiling = pkgs.buildPlatform != pkgs.hostPlatform;
 
   # Convert a string that represents a Cargo system "target" into a form where
   # it can be interpolated into an environment variable for Cargo that tells
@@ -110,11 +119,27 @@ Cflags: -I$out/include
 EOF
 '';
 
+  # Read some metadata out of the derivation for the crate (courtesy of
+  # naersk, thanks).  We get the package version and name and then
+  # post-process the name a bit for a couple different purposes.
   version = crate.version;
+
+  # Since name is like "libfoo-version", we can compute the conventional
+  # "pname" by slicing the "-version" suffix off.
   pname = with builtins;
     substring 0 (stringLength crate.name - stringLength version - 1) crate.name;
+
+  # Then we can preserve the name we gave it in the past (kind of carelessly)
+  # with underscores instead of dashes.
   libname = "${lib.replaceChars ["-"] ["_"] pname}";
 
-  ld = "${pkgsForHost.stdenv.cc}/bin/${pkgsForHost.stdenv.hostPlatform.config}-ld";
+  # The linker that is correct to use for the host system.  This is only used
+  # for cross-compilation at the moment, since I don't know the correct value
+  # to specify for a native build and Cargo also doesn't seem to need our help
+  # in that case.
+  ld = "${pkgs.stdenv.cc}/bin/${pkgs.stdenv.hostPlatform.config}-ld";
+
+  # Alias lib for convenience above..
+  lib = pkgs.lib;
 in
 libchallenge_bypass_ristretto_ffi

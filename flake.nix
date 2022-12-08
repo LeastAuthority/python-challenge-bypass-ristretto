@@ -44,8 +44,7 @@
         packages = {
           libchallenge_bypass_ristretto_ffi =
             import ./nix/libchallenge-bypass-ristretto-ffi.nix {
-              inherit (pkgs) lib;
-              pkgsForHost = pkgs;
+              inherit pkgs;
               fenix = fenix.packages.${system};
               naersk = naersk.lib.${system};
               src = libchallenge_bypass_ristretto_ffi-src;
@@ -59,8 +58,7 @@
         pkgsCross = {
           libchallenge_bypass_ristretto_ffi =
             import ./nix/libchallenge-bypass-ristretto-ffi.nix {
-              inherit (pkgs) lib;
-              pkgsForHost = pkgs.pkgsCross.${crossSystem};
+              pkgs = pkgs.pkgsCross.${crossSystem};
               fenix = fenix.packages.${system};
               naersk = naersk.lib.${system};
               src = libchallenge_bypass_ristretto_ffi-src;
