@@ -3,14 +3,23 @@
     nixpkgs = {
       url = "github:nixos/nixpkgs?ref=nixos-22.11";
     };
+
+    # The source repository for the crate we're building.
     libchallenge_bypass_ristretto_ffi-src = {
       url = "github:brave-intl/challenge-bypass-ristretto-ffi";
       flake = false;
     };
+
+    # A flake which provides pretty good support for Rust-related packages,
+    # including a nice way to customize a build tool chain (eg, for
+    # cross-compilation).
     fenix = {
       url = "github:nix-community/fenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # A flake which provides pretty good support for building Rust crates and
+    # which conveniently can consume the Rust toolchain provided by fenix.
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -24,14 +33,32 @@
     , naersk
     }:
     let
+      # Get a function that helps set up packages that are cross-compiled for
+      # other systems.
       eachSystemAndCross = import ./nix/each-system-and-cross.nix {
         inherit (nixpkgs) lib;
         buildSystems = [
+          # In principle we could build on many different systems.  In
+          # practice all our build systems are probably of this one type and
+          # we haven't tested the build anywhere else.
           "x86_64-linux"
         ];
         crossSystems = [
           "aarch64-android"
-          "armv7a-android-prebuilt"
+          # There is only -prebuilt for armv7a so we'll probably use it, if we
+          # need armv7.  Unfortunately, it is broken in our pinned version of
+          # nixpkgs (in the same way as aarch64-android-prebuilt):
+          #
+          # error: infinite recursion encountered
+          #
+          #        at /nix/store/jwk...-source/pkgs/stdenv/generic/default.nix:133:14:
+          #
+          #           132|
+          #           133|       inherit initialPath shell
+          #              |              ^
+          #           134|         defaultNativeBuildInputs defaultBuildInputs;
+
+          # "armv7a-android-prebuilt"
         ];
       };
     in eachSystemAndCross (system: crossSystem:
@@ -41,6 +68,7 @@
           inherit (self.legacyPackages.${system}) libchallenge_bypass_ristretto_ffi;
         };
       in {
+        # Define our native-compilation packages.
         packages = {
           libchallenge_bypass_ristretto_ffi =
             import ./nix/libchallenge-bypass-ristretto-ffi.nix {
@@ -55,6 +83,8 @@
           python310-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
         };
 
+        # Define our cross-compiled packages.  This currently does not include
+        # the Python package because that cross-compilation fails.
         pkgsCross = {
           libchallenge_bypass_ristretto_ffi =
             import ./nix/libchallenge-bypass-ristretto-ffi.nix {
@@ -65,6 +95,8 @@
             };
         };
 
+        # Define a bunch of checks that can be run automatically to verify the
+        # flake outputs are in good shape.
         checks =
           let
             lib = self.packages.${system}.libchallenge_bypass_ristretto_ffi;
@@ -127,6 +159,8 @@ echo "passed" > "$out"
 '';
         };
 
+        # Define a basic development environment.  It's focused on working on
+        # the Python codebase.
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             (python3.withPackages (ps: with ps; [
