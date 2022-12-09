@@ -177,16 +177,6 @@ echo "passed" > "$out"
               hypothesis
             ]))
           ];
-
-          nativeBuildInputs = with pkgs; [
-            cabal-install
-            ghc
-            pkgconfig
-            cargo
-            rustc
-
-            self.packages.${system}.libchallenge_bypass_ristretto_ffi
-          ];
         };
       });
 }
