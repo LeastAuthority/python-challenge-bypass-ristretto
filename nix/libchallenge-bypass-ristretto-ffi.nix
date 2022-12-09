@@ -90,6 +90,11 @@ let
   #
   # string -> string
   setSONAME = name: {
+    # If we could consitently use a "compiler" (gcc, clang) as a "linker" --
+    # instead of sometimes using a "linker" (ld, ld.lld) as a "linker" -- then
+    # we probably wouldn't need any branching to figure this out.  But we
+    # sometimes use ld and sometimes gcc.
+    #
     "lld" = "--soname=${name}";
     "bfd" = "-Wl,-soname,${name}";
   }.${pkgs.stdenv.hostPlatform.linker};
