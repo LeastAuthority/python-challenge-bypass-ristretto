@@ -1,0 +1,104 @@
+{
+  "nodes": {
+    "fenix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-analyzer-src": "rust-analyzer-src"
+      },
+      "locked": {
+        "lastModified": 1670394267,
+        "narHash": "sha256-e3Rww5M3k50QqzXbQu/jiDdsUkfblFydrUQJPj8YYfM=",
+        "owner": "nix-community",
+        "repo": "fenix",
+        "rev": "f926b4aefa71d6f3ecb784c61f6f58d04d28fd2c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "fenix",
+        "type": "github"
+      }
+    },
+    "libchallenge_bypass_ristretto_ffi-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1650323908,
+        "narHash": "sha256-b+iAbL2MR8uP21v16hESX7O9Ioj7a8o0GGqeYIFD1ys=",
+        "owner": "brave-intl",
+        "repo": "challenge-bypass-ristretto-ffi",
+        "rev": "419995e4a873c294f1eaefca276f8ad25328e89f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "brave-intl",
+        "repo": "challenge-bypass-ristretto-ffi",
+        "type": "github"
+      }
+    },
+    "naersk": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1662220400,
+        "narHash": "sha256-9o2OGQqu4xyLZP9K6kNe1pTHnyPz0Wr3raGYnr9AIgY=",
+        "owner": "nix-community",
+        "repo": "naersk",
+        "rev": "6944160c19cb591eb85bbf9b2f2768a935623ed3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "naersk",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1670372410,
+        "narHash": "sha256-BDiOUkuqgq5DP+E5xfTzIFYYyMb8DpSLYmeaOBeZ0vg=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "5528350186a9e826588cee1329640899ca44a0cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-22.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "fenix": "fenix",
+        "libchallenge_bypass_ristretto_ffi-src": "libchallenge_bypass_ristretto_ffi-src",
+        "naersk": "naersk",
+        "nixpkgs": "nixpkgs"
+      }
+    },
+    "rust-analyzer-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1670314574,
+        "narHash": "sha256-gkj21vqdQC6nbbk0YZRy02eLEom38gtzVNqfLc2nKLE=",
+        "owner": "rust-lang",
+        "repo": "rust-analyzer",
+        "rev": "df07c8fafa78ace4c4d2ded82d561f76a35e0ade",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rust-lang",
+        "ref": "nightly",
+        "repo": "rust-analyzer",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

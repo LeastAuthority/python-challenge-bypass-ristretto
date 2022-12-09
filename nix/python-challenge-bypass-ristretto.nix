@@ -1,13 +1,11 @@
 # A basic packaging of this very project: Python bindings to the Rust
 # Ristretto implementation.
-{ challenge-bypass-ristretto-ffi, git, python, pythonPackages, setuptools_scm, milksnake, cffi, attrs, testtools, hypothesis }:
+{ libchallenge_bypass_ristretto_ffi, python, pythonPackages, milksnake, cffi, attrs, testtools, hypothesis }:
 pythonPackages.buildPythonPackage rec {
-  version = "0.0.0";
+  version = "2022.6.30";
   pname = "python-challenge-bypass-ristretto";
   name = "${pname}-${version}";
-  # TODO: It would be nice to cleanSource here but that excludes .git and
-  # setuptools_scm fails without it.
-  src = ./.;
+  src = ../.;
 
   # We hack up setup.py a bit.  We're going to supply a pre-built Ristretto
   # FFI library.  We don't want Python distutils to build it for us.  This
@@ -17,18 +15,13 @@ pythonPackages.buildPythonPackage rec {
   substituteInPlace $sourceRoot/setup.py \
       --replace "['cargo', 'build', '--release']" "['sh', '-c', ':']" \
       --replace "./challenge-bypass-ristretto-ffi" "/" \
-      --replace "_DYLIB_NAME = 'challenge_bypass_ristretto'" "_DYLIB_NAME = 'challenge_bypass_ristretto_ffi'" \
-      --replace "target/release" "${challenge-bypass-ristretto-ffi.lib}/lib" \
-      --replace "./src" "${challenge-bypass-ristretto-ffi.src}/src"
+      --replace "target/release" "${libchallenge_bypass_ristretto_ffi}/lib" \
+      --replace "./src" "${libchallenge_bypass_ristretto_ffi.src}/src" \
+      --replace "'setuptools_scm'" ""
   '';
 
-  nativeBuildInputs = [
-    # necessary for setuptools_scm to compute the version being built
-    git
-  ];
-
   propagatedNativeBuildInputs = [
-    challenge-bypass-ristretto-ffi.lib
+    libchallenge_bypass_ristretto_ffi
   ];
 
   propagatedBuildInputs = [
@@ -38,8 +31,6 @@ pythonPackages.buildPythonPackage rec {
   ];
 
   buildInputs = [
-    # required to provide metadata for the build
-    setuptools_scm
     # required to build the cffi extension module
     milksnake
   ];
