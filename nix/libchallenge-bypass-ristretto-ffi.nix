@@ -174,7 +174,7 @@ EOF
   # for cross-compilation at the moment, since I don't know the correct value
   # to specify for a native build and Cargo also doesn't seem to need our help
   # in that case.
-  ld = "${pkgs.stdenv.cc}/bin/${pkgs.stdenv.hostPlatform.config}-ld";
+  ld = "${pkgs.stdenv.cc}/bin/${pkgs.stdenv.cc.targetPrefix}ld";
 
   # Alias lib for convenience above..
   lib = pkgs.lib;
