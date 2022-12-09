@@ -51,6 +51,20 @@ let
     # It must also use the correct linker for the host system.  Another quirk
     # of cross-compilation is that we don't always know how to tell Rust how
     # to link correctly when (build == host).
+    #
+    # In principle we could also add this to .cargo/config.toml in the source like:
+    #
+    #    [target.aarch64-linux-android]
+    #    linker = "aarch64-unknown-linux-android-clang"
+    #
+    # as long as we know in advance all of the targets and what the correct
+    # linker to use for them is, which perhaps we do.  However, doing so means
+    # patching the source or convincing upstream to take the config.  Perhaps
+    # they would - I haven't tried.  Also, I don't understand how the relative
+    # path in the above example (which really works!) gets resolved in this
+    # build.  In contrast, `ld` here is (and must be, apparently) absolute.
+    #
+    # Which approach is better, I do not know.
     "CARGO_TARGET_${toEnvVar rustSystemTarget}_LINKER" = ld;
   }));
 
