@@ -76,9 +76,13 @@ commands:
                   # sure we only try to use auditwheel on the appropriate
                   # platform.  That is, only on Linux.
                   << parameters.python >> -m auditwheel repair dist/python_challenge_bypass_ristretto*.whl
-                  # Move the fixed wheel here for consistency with the
-                  # non-manylinux case.
-                  mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
+
+                  # Get rid of the original wheel.
+                  rm dist/python_challenge_bypass_ristretto*.whl
+
+                  # Move the fixed wheel to the original location for
+                  # consistency with the non-manylinux case.
+                  mv wheelhouse/python_challenge_bypass_ristretto*.whl ./dist/
 
       - run:
           name: "Upload Wheel"
@@ -116,8 +120,8 @@ commands:
             fi
             find
             << parameters.python >> -m twine upload --repository $repo \
-              python_challenge_bypass_ristretto*.whl \
-              python-challenge-bypass-ristretto*.tar.gz
+              dist/python_challenge_bypass_ristretto*.whl \
+              dist/python-challenge-bypass-ristretto*.tar.gz
 
 # Define the actual jobs that will be available to run in a workflow.
 jobs:
