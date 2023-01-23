@@ -75,6 +75,7 @@ commands:
                   # Since both macOS and Linux jobs re-use this step, make
                   # sure we only try to use auditwheel on the appropriate
                   # platform.  That is, only on Linux.
+                  find
                   << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
                   # Delete the original, unfixed wheel.
                   rm *.whl
