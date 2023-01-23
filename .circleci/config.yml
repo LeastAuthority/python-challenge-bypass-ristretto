@@ -27,6 +27,9 @@ commands:
         description: "A boolean controlling whether the auditwheel tool is used to fix up the wheel"
         type: "boolean"
 
+      # A parameter that lets us direct only one of the jobs to upload the
+      # sdist.  Otherwise twine fails when all jobs except the first try to
+      # re-upload a package file that already exists.
       upload-sdist:
         description: "True to upload sdist to the package index, False otherwise"
         type: "boolean"
@@ -81,11 +84,11 @@ commands:
                   # platform.  That is, only on Linux.
                   << parameters.python >> -m auditwheel repair dist/python_challenge_bypass_ristretto*.whl
 
-                  # Get rid of the original wheel.
+                  # Delete the original, unfixed wheel.
                   rm dist/python_challenge_bypass_ristretto*.whl
 
-                  # Move the fixed wheel to the original location for
-                  # consistency with the non-manylinux case.
+                  # Move the fixed wheel here for consistency with the
+                  # non-manylinux case.
                   mv wheelhouse/python_challenge_bypass_ristretto*.whl ./dist/
 
       - run:
