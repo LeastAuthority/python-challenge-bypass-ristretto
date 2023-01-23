@@ -114,6 +114,7 @@ commands:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
+            find
             << parameters.python >> -m twine upload --repository $repo \
               python_challenge_bypass_ristretto*.whl \
               python-challenge-bypass-ristretto*.tar.gz
