@@ -18,6 +18,11 @@ pythonPackages.buildPythonPackage rec {
       --replace "target/release" "${libchallenge_bypass_ristretto_ffi}/lib" \
       --replace "./src" "${libchallenge_bypass_ristretto_ffi.src}/src" \
       --replace "'setuptools_scm'" ""
+
+  cat >$sourceRoot/setup.cfg <<EOF
+  [metadata]
+  version=${version}
+  EOF
   '';
 
   propagatedNativeBuildInputs = [
