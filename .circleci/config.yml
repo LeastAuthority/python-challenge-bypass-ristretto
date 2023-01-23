@@ -76,8 +76,6 @@ commands:
                   # sure we only try to use auditwheel on the appropriate
                   # platform.  That is, only on Linux.
                   << parameters.python >> -m auditwheel repair dist/python_challenge_bypass_ristretto*.whl
-                  # Delete the original, unfixed wheel.
-                  rm *.whl
                   # Move the fixed wheel here for consistency with the
                   # non-manylinux case.
                   mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
