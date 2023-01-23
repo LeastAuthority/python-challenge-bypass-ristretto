@@ -278,12 +278,27 @@ workflows:
           # fails if we don't have any ssh client.
           pre-command: "yum install -y openssh-clients"
           python: "/opt/python/cp37-cp37m/bin/python"
+          filters: &FILTERS
+            # CircleCI does not run workflows for tags unless you explicitly
+            # specify tag filters. Additionally, if a job requires any other
+            # jobs (directly or indirectly), you must specify tag filters for
+            # those jobs.
+            # https://circleci.com/docs/2.0/configuration-reference/?section=configuration#tags
+            branches:
+              # Keep running on all branches
+              only: "/.*/"
+            tags:
+              # Run on all release tags too
+              only: "/v.*/"
+
       - "package-manylinux":
           name: "package-manylinux_2_24-x86_64"
           executor: "manylinux_2_24-x86_64"
           # Similar to the manylinux-2014_x86_64 case.
           pre-command: "apt-get update -y && apt-get install -y openssh-client"
           python: "/opt/python/cp37-cp37m/bin/python"
+          filters:
+            <<: *FILTERS
 
       - "package-macos":
           matrix:
@@ -297,14 +312,4 @@ workflows:
                 # A macOS 12.x
                 - "14.1.0"
           filters:
-            # CircleCI does not run workflows for tags unless you explicitly
-            # specify tag filters. Additionally, if a job requires any other
-            # jobs (directly or indirectly), you must specify tag filters for
-            # those jobs.
-            # https://circleci.com/docs/2.0/configuration-reference/?section=configuration#tags
-            branches:
-              # Keep running on all branches
-              only: "/.*/"
-            tags:
-              # Run on all release tags too
-              only: "/v.*/"
+            <<: *FILTERS
