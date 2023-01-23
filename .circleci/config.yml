@@ -14,8 +14,8 @@ executors:
 # Define some custom commands that we can use as elements of `steps` in job
 # definitions.
 commands:
-  build-wheel:
-    description: "Build a Python wheel"
+  build-packages:
+    description: "Build Python packages"
 
     parameters:
       python:
@@ -25,6 +25,10 @@ commands:
 
       audit-wheel:
         description: "A boolean controlling whether the auditwheel tool is used to fix up the wheel"
+        type: "boolean"
+
+      upload-sdist:
+        description: "True to upload sdist to the package index, False otherwise"
         type: "boolean"
 
     steps:
@@ -85,7 +89,7 @@ commands:
                   mv wheelhouse/python_challenge_bypass_ristretto*.whl ./dist/
 
       - run:
-          name: "Upload Wheel"
+          name: "Upload Packages"
           environment:
             # PyPI authentication configuration for twine so we can upload
             # packages.  TWINE_PASSWORD is set in the CircleCI private
@@ -118,9 +122,16 @@ commands:
               repo="testpypi"
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
-            << parameters.python >> -m twine upload --repository $repo \
-              dist/python_challenge_bypass_ristretto*.whl \
-              dist/python-challenge-bypass-ristretto*.tar.gz
+
+            upload() {
+                << parameters.python >> -m twine upload --repository $repo "$@"
+            }
+
+            upload dist/python_challenge_bypass_ristretto*.whl
+
+            if << parameters.upload-sdist >>; then
+              upload dist/python-challenge-bypass-ristretto*.tar.gz
+            fi
 
 # Define the actual jobs that will be available to run in a workflow.
 jobs:
@@ -144,6 +155,9 @@ jobs:
         description: "the path to the Python executable to use"
         type: "string"
 
+      upload-sdist:
+        description: "See build-packages"
+        type: "boolean"
 
     executor: "<< parameters.executor >>"
 
@@ -153,9 +167,10 @@ jobs:
           command: |
             << parameters.pre-command >>
 
-      - "build-wheel":
+      - "build-packages":
           python: "<< parameters.python >>"
           audit-wheel: true
+          upload-sdist: << parameters.upload-sdist >>
 
   package-macos:
     parameters:
@@ -166,8 +181,9 @@ jobs:
       xcode: "<< parameters.xcode-version >>"
 
     steps:
-      - "build-wheel":
+      - "build-packages":
           audit-wheel: false
+          upload-sdist: false
 
 
   nix-template: &NIX_TEMPLATE
@@ -278,6 +294,8 @@ workflows:
           # fails if we don't have any ssh client.
           pre-command: "yum install -y openssh-clients"
           python: "/opt/python/cp37-cp37m/bin/python"
+          # This one can upload the sdist.
+          upload-sdist: true
           filters: &FILTERS
             # CircleCI does not run workflows for tags unless you explicitly
             # specify tag filters. Additionally, if a job requires any other
@@ -297,6 +315,8 @@ workflows:
           # Similar to the manylinux-2014_x86_64 case.
           pre-command: "apt-get update -y && apt-get install -y openssh-client"
           python: "/opt/python/cp37-cp37m/bin/python"
+          # The other one can upload the sdist.
+          upload-sdist: false
           filters:
             <<: *FILTERS
 
