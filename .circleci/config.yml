@@ -104,6 +104,10 @@ commands:
             #    Scope: Project: python-challenge-bypass-ristretto
             TWINE_USERNAME: "__token__"
 
+            # Avoid twine trying to get user input from us.  It would just hang
+            # forever.
+            TWINE_NON_INTERACTIVE: "yes"
+
           command: |
             if [[ "$CIRCLE_TAG" == v* ]]; then
               # We're building a release tag so we should probably really
