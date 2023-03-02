@@ -216,8 +216,9 @@ jobs:
       - run:
           name: "Build"
           command: |
-            cachix watch-exec "${CACHIX_NAME}" -- \
-              nix build ".#<< parameters.python-version >>-challenge-bypass-ristretto"
+            source .circleci/lib.sh
+            cache_if_able nix build \
+              ".#<< parameters.python-version >>-challenge-bypass-ristretto"
 
   build-aarch64-android:
     <<: *NIX_TEMPLATE
@@ -232,8 +233,9 @@ jobs:
       - run:
           name: "Cross-Build"
           command: |
-            cachix watch-exec "${CACHIX_NAME}" -- \
-              nix build '.#pkgsCross.aarch64-android.libchallenge_bypass_ristretto_ffi'
+            source .circleci/lib.sh
+            cache_if_able nix build \
+              '.#pkgsCross.aarch64-android.libchallenge_bypass_ristretto_ffi'
 
   check:
     <<: *NIX_TEMPLATE
@@ -248,9 +250,8 @@ jobs:
       - run:
           name: "Check"
           command: |
-            cachix watch-exec "${CACHIX_NAME}" -- \
-              nix flake check
-
+            source .circleci/lib.sh
+            cache_if_able nix flake check
 
 workflows:
   version: 2
