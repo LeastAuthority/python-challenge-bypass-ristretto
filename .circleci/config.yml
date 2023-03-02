@@ -33,9 +33,16 @@ commands:
           # And the rest of it.
           name: "Finish checking out source"
           command: |
+            # Some commands depend on the current system time (aaaaaaahh)!
+            # Record it for later inspection if necessary.
+            date
+
+            # libchallenge_bypass_ristretto is managed as a git submodule
+            # sometimes.
             git submodule init
             git submodule update
             git fetch --tags
+
 
       - run:
           name: "Install Rust Build Toolchain"
