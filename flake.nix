@@ -79,8 +79,8 @@
             };
 
           python38-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
-          python39-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
-          python310-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
+          python39-challenge-bypass-ristretto = py-module pkgs.python39.pkgs;
+          python310-challenge-bypass-ristretto = py-module pkgs.python310.pkgs;
         };
 
         # Define our cross-compiled packages.  This currently does not include
