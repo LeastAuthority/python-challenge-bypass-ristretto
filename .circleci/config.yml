@@ -146,6 +146,7 @@ commands:
 
               if << parameters.upload-sdist >>; then
                 upload dist/python-challenge-bypass-ristretto*.tar.gz
+              fi
             else
               echo "Package index credentials unavailable; skipping upload."
             fi
