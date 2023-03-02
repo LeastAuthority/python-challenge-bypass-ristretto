@@ -40,7 +40,7 @@ pip install --editable .
 There is also Nix-based package which manages most of this complexity for you and only requires a checkout:
 
 ```
-nix-build
+nix build
 ```
 
 # License
