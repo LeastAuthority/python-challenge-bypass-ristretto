@@ -14,8 +14,8 @@ executors:
 # Define some custom commands that we can use as elements of `steps` in job
 # definitions.
 commands:
-  build-wheel:
-    description: "Build a Python wheel"
+  build-packages:
+    description: "Build Python packages"
 
     parameters:
       python:
@@ -25,6 +25,13 @@ commands:
 
       audit-wheel:
         description: "A boolean controlling whether the auditwheel tool is used to fix up the wheel"
+        type: "boolean"
+
+      # A parameter that lets us direct only one of the jobs to upload the
+      # sdist.  Otherwise twine fails when all jobs except the first try to
+      # re-upload a package file that already exists.
+      upload-sdist:
+        description: "True to upload sdist to the package index, False otherwise"
         type: "boolean"
 
     steps:
@@ -66,12 +73,12 @@ commands:
             # to rely on whatever resolution logic setuptools would apply.
             << parameters.python >> -m pip install --upgrade milksnake setuptools_scm
             # And get these so we can build, fix, and upload a wheel.
-            << parameters.python >> -m pip install wheel auditwheel twine
+            << parameters.python >> -m pip install build auditwheel twine
 
       - run:
-          name: "Build Wheel"
+          name: "Build Packages"
           command: |
-            << parameters.python >> -m pip wheel --no-deps .
+            << parameters.python >> -m build --sdist --wheel
 
       - when:
           condition: << parameters.audit-wheel >>
@@ -82,15 +89,17 @@ commands:
                   # Since both macOS and Linux jobs re-use this step, make
                   # sure we only try to use auditwheel on the appropriate
                   # platform.  That is, only on Linux.
-                  << parameters.python >> -m auditwheel repair python_challenge_bypass_ristretto*.whl
+                  << parameters.python >> -m auditwheel repair dist/python_challenge_bypass_ristretto*.whl
+
                   # Delete the original, unfixed wheel.
-                  rm *.whl
+                  rm dist/python_challenge_bypass_ristretto*.whl
+
                   # Move the fixed wheel here for consistency with the
                   # non-manylinux case.
-                  mv wheelhouse/python_challenge_bypass_ristretto*.whl ./
+                  mv wheelhouse/python_challenge_bypass_ristretto*.whl ./dist/
 
       - run:
-          name: "Upload Wheel"
+          name: "Upload Packages"
           environment:
             # PyPI authentication configuration for twine so we can upload
             # packages.  TWINE_PASSWORD is set in the CircleCI private
@@ -128,8 +137,16 @@ commands:
               TWINE_PASSWORD="$TWINE_TESTPYPI_PASSWORD"
             fi
 
+            upload() {
+                << parameters.python >> -m twine upload --repository "$repo" "$@"
+            }
+
             if [ -n "${TWINE_PASSWORD}" ]; then
-              << parameters.python >> -m twine upload --repository $repo python_challenge_bypass_ristretto*.whl
+              upload dist/python_challenge_bypass_ristretto*.whl
+
+              if << parameters.upload-sdist >>; then
+                upload dist/python-challenge-bypass-ristretto*.tar.gz
+              fi
             else
               echo "Package index credentials unavailable; skipping upload."
             fi
@@ -156,6 +173,9 @@ jobs:
         description: "the path to the Python executable to use"
         type: "string"
 
+      upload-sdist:
+        description: "See build-packages"
+        type: "boolean"
 
     executor: "<< parameters.executor >>"
 
@@ -165,9 +185,10 @@ jobs:
           command: |
             << parameters.pre-command >>
 
-      - "build-wheel":
+      - "build-packages":
           python: "<< parameters.python >>"
           audit-wheel: true
+          upload-sdist: << parameters.upload-sdist >>
 
   package-macos:
     parameters:
@@ -178,8 +199,9 @@ jobs:
       xcode: "<< parameters.xcode-version >>"
 
     steps:
-      - "build-wheel":
+      - "build-packages":
           audit-wheel: false
+          upload-sdist: false
 
 
   nix-template: &NIX_TEMPLATE
@@ -291,12 +313,31 @@ workflows:
           # fails if we don't have any ssh client.
           pre-command: "yum install -y openssh-clients"
           python: "/opt/python/cp37-cp37m/bin/python"
+          # This one can upload the sdist.
+          upload-sdist: true
+          filters: &FILTERS
+            # CircleCI does not run workflows for tags unless you explicitly
+            # specify tag filters. Additionally, if a job requires any other
+            # jobs (directly or indirectly), you must specify tag filters for
+            # those jobs.
+            # https://circleci.com/docs/2.0/configuration-reference/?section=configuration#tags
+            branches:
+              # Keep running on all branches
+              only: "/.*/"
+            tags:
+              # Run on all release tags too
+              only: "/v.*/"
+
       - "package-manylinux":
           name: "package-manylinux_2_24-x86_64"
           executor: "manylinux_2_24-x86_64"
           # Similar to the manylinux-2014_x86_64 case.
           pre-command: "apt-get update -y && apt-get install -y openssh-client"
           python: "/opt/python/cp37-cp37m/bin/python"
+          # The other one can upload the sdist.
+          upload-sdist: false
+          filters:
+            <<: *FILTERS
 
       - "package-macos":
           matrix:
@@ -310,14 +351,4 @@ workflows:
                 # A macOS 12.x
                 - "14.1.0"
           filters:
-            # CircleCI does not run workflows for tags unless you explicitly
-            # specify tag filters. Additionally, if a job requires any other
-            # jobs (directly or indirectly), you must specify tag filters for
-            # those jobs.
-            # https://circleci.com/docs/2.0/configuration-reference/?section=configuration#tags
-            branches:
-              # Keep running on all branches
-              only: "/.*/"
-            tags:
-              # Run on all release tags too
-              only: "/v.*/"
+            <<: *FILTERS

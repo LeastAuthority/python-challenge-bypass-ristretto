@@ -2,7 +2,7 @@
 # Ristretto implementation.
 { libchallenge_bypass_ristretto_ffi, python, pythonPackages, milksnake, cffi, attrs, testtools, hypothesis }:
 pythonPackages.buildPythonPackage rec {
-  version = "2022.6.30";
+  version = "2023.1.23";
   pname = "python-challenge-bypass-ristretto";
   name = "${pname}-${version}";
   src = ../.;
@@ -18,6 +18,11 @@ pythonPackages.buildPythonPackage rec {
       --replace "target/release" "${libchallenge_bypass_ristretto_ffi}/lib" \
       --replace "./src" "${libchallenge_bypass_ristretto_ffi.src}/src" \
       --replace "'setuptools_scm'" ""
+
+  cat >$sourceRoot/setup.cfg <<EOF
+  [metadata]
+  version=${version}
+  EOF
   '';
 
   propagatedNativeBuildInputs = [
