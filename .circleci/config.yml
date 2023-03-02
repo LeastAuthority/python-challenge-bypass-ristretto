@@ -40,9 +40,16 @@ commands:
           # And the rest of it.
           name: "Finish checking out source"
           command: |
+            # Some commands depend on the current system time (aaaaaaahh)!
+            # Record it for later inspection if necessary.
+            date
+
+            # libchallenge_bypass_ristretto is managed as a git submodule
+            # sometimes.
             git submodule init
             git submodule update
             git fetch --tags
+
 
       - run:
           name: "Install Rust Build Toolchain"
@@ -113,6 +120,10 @@ commands:
             #    Scope: Project: python-challenge-bypass-ristretto
             TWINE_USERNAME: "__token__"
 
+            # Avoid twine trying to get user input from us.  It would just hang
+            # forever.
+            TWINE_NON_INTERACTIVE: "yes"
+
           command: |
             if [[ "$CIRCLE_TAG" == v* ]]; then
               # We're building a release tag so we should probably really
@@ -127,13 +138,16 @@ commands:
             fi
 
             upload() {
-                << parameters.python >> -m twine upload --repository $repo "$@"
+                << parameters.python >> -m twine upload --repository "$repo" "$@"
             }
 
-            upload dist/python_challenge_bypass_ristretto*.whl
+            if [ -n "${TWINE_PASSWORD}" ]; then
+              upload dist/python_challenge_bypass_ristretto*.whl
 
-            if << parameters.upload-sdist >>; then
-              upload dist/python-challenge-bypass-ristretto*.tar.gz
+              if << parameters.upload-sdist >>; then
+                upload dist/python-challenge-bypass-ristretto*.tar.gz
+            else
+              echo "Package index credentials unavailable; skipping upload."
             fi
 
 # Define the actual jobs that will be available to run in a workflow.
@@ -239,8 +253,9 @@ jobs:
       - run:
           name: "Build"
           command: |
-            cachix watch-exec "${CACHIX_NAME}" -- \
-              nix build ".#<< parameters.python-version >>-challenge-bypass-ristretto"
+            source .circleci/lib.sh
+            cache_if_able nix build \
+              ".#<< parameters.python-version >>-challenge-bypass-ristretto"
 
   build-aarch64-android:
     <<: *NIX_TEMPLATE
@@ -255,8 +270,9 @@ jobs:
       - run:
           name: "Cross-Build"
           command: |
-            cachix watch-exec "${CACHIX_NAME}" -- \
-              nix build '.#pkgsCross.aarch64-android.libchallenge_bypass_ristretto_ffi'
+            source .circleci/lib.sh
+            cache_if_able nix build \
+              '.#pkgsCross.aarch64-android.libchallenge_bypass_ristretto_ffi'
 
   check:
     <<: *NIX_TEMPLATE
@@ -271,9 +287,8 @@ jobs:
       - run:
           name: "Check"
           command: |
-            cachix watch-exec "${CACHIX_NAME}" -- \
-              nix flake check
-
+            source .circleci/lib.sh
+            cache_if_able nix flake check
 
 workflows:
   version: 2
