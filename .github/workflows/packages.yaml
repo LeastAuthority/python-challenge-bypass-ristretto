@@ -77,10 +77,10 @@ jobs:
         pip install wheel twine
 
     - name: Build a binary wheel and a source tarball
-      uses: LeastAuthority/python-wheels-manylinux-build@master
+      uses: RalfG/python-wheels-manylinux-build@v0.7.1
       with:
-        python-versions: "cp37-cp37m"
-        install-extra-requirements: ".github/workflows/install-rust.sh"
+        python-versions: cp311-cp311
+        pre-build-command: ".github/workflows/install-rust.sh"
 
     - name: Put packages where they can be found
       run: |
