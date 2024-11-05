@@ -297,7 +297,9 @@ workflows:
   all-tests:
     jobs:
       - "check"
-      - "build-aarch64-android"
+      # Don't build the aarch64 version for now - it takes forever,
+      # fails on CI, and we don't use it currently anyway.
+      # - "build-aarch64-android"
       - "build-native":
           matrix:
             parameters:
