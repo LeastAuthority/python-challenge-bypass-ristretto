@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs = {
-      url = "github:nixos/nixpkgs?ref=nixos-22.11";
+      url = "github:nixos/nixpkgs?ref=nixos-24.05";
     };
 
     # The source repository for the crate we're building.
