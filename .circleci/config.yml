@@ -333,8 +333,7 @@ workflows:
       - "package-manylinux":
           name: "package-manylinux_2_28-x86_64"
           executor: "manylinux_2_28-x86_64"
-          # Similar to the manylinux-2014_x86_64 case.
-          pre-command: "apt-get update -y && apt-get install -y openssh-client"
+          pre-command: "yum install -y openssh-clients"
           python: "/opt/python/cp37-cp37m/bin/python"
           # The other one can upload the sdist.
           upload-sdist: false
