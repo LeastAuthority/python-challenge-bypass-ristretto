@@ -301,9 +301,10 @@ workflows:
           matrix:
             parameters:
               python-version:
-                - "python38"
                 - "python39"
                 - "python310"
+                - "python311"
+                - "python312"
 
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
