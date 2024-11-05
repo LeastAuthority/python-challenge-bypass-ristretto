@@ -28,6 +28,8 @@ setup(
     packages=['challenge_bypass_ristretto', 'challenge_bypass_ristretto.tests'],
     zip_safe=False,
     platforms='any',
+    # This version string should be kept in sync with the one declared in
+    # 'nix/python-challenge-bypass-ristretto.nix'
     version='2024.11.5',
     setup_requires=['milksnake'],
     install_requires=['cffi', 'attrs'],

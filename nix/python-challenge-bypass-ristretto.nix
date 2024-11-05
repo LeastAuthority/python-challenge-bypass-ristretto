@@ -2,6 +2,8 @@
 # Ristretto implementation.
 { libchallenge_bypass_ristretto_ffi, python, pythonPackages, milksnake, cffi, attrs, testtools, hypothesis }:
 pythonPackages.buildPythonPackage rec {
+  # This version string should be kept in sync with the one declared in
+  # 'setup.py'
   version = "2024.11.5";
   pname = "python-challenge-bypass-ristretto";
   name = "${pname}-${version}";
