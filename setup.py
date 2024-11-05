@@ -34,7 +34,9 @@ setup(
     packages=['challenge_bypass_ristretto', 'challenge_bypass_ristretto.tests'],
     zip_safe=False,
     platforms='any',
-    setup_requires=['milksnake', 'setuptools_scm'],
+    # setup_requires=['milksnake', 'setuptools_scm'],
+    version='2024.11.5',
+    setup_requires=['milksnake'],
     install_requires=['cffi', 'attrs'],
     extras_require={
         "tests": [
@@ -42,7 +44,7 @@ setup(
             "hypothesis",
         ],
     },
-    use_scm_version=_myversion,
+    # use_scm_version=_myversion,
     url='https://github.com/LeastAuthority/python-challenge-bypass-ristretto',
     milksnake_tasks=[
         build_native

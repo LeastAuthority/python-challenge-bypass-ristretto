@@ -1,9 +1,0 @@
-[build-system]
-requires = ["setuptools>=64", "setuptools-scm>=8"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "python-challenge-bypass-ristretto"
-dynamic = ["version"]
-
-[tool.setuptools_scm]
