@@ -110,9 +110,10 @@
           in {
             # Run a little integration test that exercises the underlying
             # library via the Python interface.
-            integration38 = integration pkgs.python38;
             integration39 = integration pkgs.python39;
             integration310 = integration pkgs.python310;
+            integration311 = integration pkgs.python311;
+            integration312 = integration pkgs.python312;
 
             # The library should have the correct soname.
             soname = pkgs.runCommand "${lib.name}-soname" { } ''
