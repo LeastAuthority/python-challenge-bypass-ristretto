@@ -105,7 +105,7 @@ let
   #
   #  toEnvVar "aarch64-linux-android" = "AARCH64_LINUX_ANDROID"
   #
-  toEnvVar = s: lib.replaceChars ["-"] ["_"] (lib.toUpper s);
+  toEnvVar = s: lib.replaceStrings ["-"] ["_"] (lib.toUpper s);
 
   # Assemble a Rust build toolchain that can build for the "target" system.
   toolchain = with fenix; combine [
@@ -168,7 +168,7 @@ EOF
 
   # Then we can preserve the name we gave it in the past (kind of carelessly)
   # with underscores instead of dashes.
-  libname = "${lib.replaceChars ["-"] ["_"] pname}";
+  libname = "${lib.replaceStrings ["-"] ["_"] pname}";
 
   # The linker that is correct to use for the host system.  This is only used
   # for cross-compilation at the moment, since I don't know the correct value
