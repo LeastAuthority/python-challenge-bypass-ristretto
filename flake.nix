@@ -78,9 +78,10 @@
               src = libchallenge_bypass_ristretto_ffi-src;
             };
 
-          python38-challenge-bypass-ristretto = py-module pkgs.python38.pkgs;
           python39-challenge-bypass-ristretto = py-module pkgs.python39.pkgs;
           python310-challenge-bypass-ristretto = py-module pkgs.python310.pkgs;
+          python311-challenge-bypass-ristretto = py-module pkgs.python311.pkgs;
+          python312-challenge-bypass-ristretto = py-module pkgs.python312.pkgs;
         };
 
         # Define our cross-compiled packages.  This currently does not include
