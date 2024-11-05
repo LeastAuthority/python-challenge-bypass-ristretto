@@ -270,6 +270,7 @@ jobs:
 
       - run:
           name: "Cross-Build"
+          no_output_timeout: 30m
           command: |
             source .circleci/lib.sh
             cache_if_able nix build \
