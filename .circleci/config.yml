@@ -331,8 +331,8 @@ workflows:
               only: "/v.*/"
 
       - "package-manylinux":
-          name: "package-manylinux_2_24-x86_64"
-          executor: "manylinux_2_24-x86_64"
+          name: "package-manylinux_2_28-x86_64"
+          executor: "manylinux_2_28-x86_64"
           # Similar to the manylinux-2014_x86_64 case.
           pre-command: "apt-get update -y && apt-get install -y openssh-client"
           python: "/opt/python/cp37-cp37m/bin/python"
