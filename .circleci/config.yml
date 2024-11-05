@@ -7,9 +7,9 @@ executors:
   manylinux-2014-x86_64:
     docker:
       - image: "quay.io/pypa/manylinux2014_x86_64"
-  manylinux_2_24-x86_64:
+  manylinux_2_28-x86_64:
     docker:
-      - image: "quay.io/pypa/manylinux_2_24_x86_64"
+      - image: "quay.io/pypa/manylinux_2_28_x86_64"
 
 # Define some custom commands that we can use as elements of `steps` in job
 # definitions.
@@ -270,6 +270,7 @@ jobs:
 
       - run:
           name: "Cross-Build"
+          no_output_timeout: 30m
           command: |
             source .circleci/lib.sh
             cache_if_able nix build \
@@ -301,9 +302,10 @@ workflows:
           matrix:
             parameters:
               python-version:
-                - "python38"
                 - "python39"
                 - "python310"
+                - "python311"
+                - "python312"
 
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
@@ -329,10 +331,9 @@ workflows:
               only: "/v.*/"
 
       - "package-manylinux":
-          name: "package-manylinux_2_24-x86_64"
-          executor: "manylinux_2_24-x86_64"
-          # Similar to the manylinux-2014_x86_64 case.
-          pre-command: "apt-get update -y && apt-get install -y openssh-client"
+          name: "package-manylinux_2_28-x86_64"
+          executor: "manylinux_2_28-x86_64"
+          pre-command: "yum install -y openssh-clients"
           python: "/opt/python/cp37-cp37m/bin/python"
           # The other one can upload the sdist.
           upload-sdist: false
@@ -344,11 +345,13 @@ workflows:
             parameters:
               # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
               xcode-version:
-                # Latest macOS 10.15.x
-                - "11.7.0"
-                # Latest macOS 11.x
-                - "13.2.1"
-                # A macOS 12.x
-                - "14.1.0"
+                # macOS 12.6.1 with xcode...
+                - "13.4.1"
+                # macOS 13.2.1 with xcode...
+                - "14.3.1"
+                # macOS 14.3.1 with xcode...
+                - "15.4.0"
+                # macOS 14.6.1 with xcode...
+                - "16.1.0"
           filters:
             <<: *FILTERS
