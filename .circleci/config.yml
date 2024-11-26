@@ -207,7 +207,7 @@ jobs:
   nix-template: &NIX_TEMPLATE
     docker:
       # Run in a highly Nix-capable environment.
-      - image: "nixos/nix:2.9.2"
+      - image: "nixos/nix:2.25.2"
 
     environment:
       # Let us use features marked "experimental".  For example, most/all of
