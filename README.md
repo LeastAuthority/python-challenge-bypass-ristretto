@@ -9,7 +9,7 @@ The API largely mirrors that of the underlying Rust library with a few classes t
 For example:
 
 ```
->>> from challenge_bypass_ristretto import  RandomToken
+>>> from challenge_bypass_ristretto import RandomToken
 >>> print(RandomToken.create().blind().encode_base64())
 QxE220HfZvvOJSNdDx3hgYNfQntxeT+mkRr55LNMNyYdXdFOfkrHRoQz+MXlqfyoiWPWc7dG3k4sa5ZWDv+9WtPkZf1uZVhTwBW4YKgyPXK3jj4Ig7kKDjcGMGtoCdgJ
 ```
