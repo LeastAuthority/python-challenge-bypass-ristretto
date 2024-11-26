@@ -207,20 +207,20 @@ jobs:
   nix-template: &NIX_TEMPLATE
     docker:
       # Run in a highly Nix-capable environment.
-      - image: "nixos/nix:2.9.2"
+      - image: "nixos/nix:2.25.2"
 
     environment:
       # Let us use features marked "experimental".  For example, most/all of
       # the `nix <subcommand>` forms.
       NIX_CONFIG: "experimental-features = nix-command flakes"
 
-      # Pin a NixOS 21.11 revision.  flake evaluation is pure by default so we
+      # Pin a NixOS 24.05 revision.  flake evaluation is pure by default so we
       # don't have to worry about supplying it with a nixpkgs.  A few things
       # need to work before we get that far though.  This pin is for those
       # things.  This pin has no particular bearing on what version of our
       # dependencies we are testing against, what version of Python we
       # support, etc.  It is part of CI infrastructure.
-      NIXPKGS: "https://github.com/NixOS/nixpkgs/archive/28abc4e43a24d28729509e2d83f5c4f3b3418189.tar.gz"
+      NIXPKGS: "https://github.com/NixOS/nixpkgs/archive/ffafdaa15321c1bd24d4ca057a811b52eb9b63da.tar.gz"
 
       # CACHIX_AUTH_TOKEN is manually set in the CircleCI web UI and allows us
       # to push to CACHIX_NAME.
