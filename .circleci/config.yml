@@ -153,6 +153,17 @@ commands:
 
 # Define the actual jobs that will be available to run in a workflow.
 jobs:
+  connectivity:
+    docker:
+      - image: "nixos/nix:2.25.2"
+    steps:
+      - checkout:
+          {}
+      - run:
+          name: "SSH key used to checkout"
+          command: |
+            cat ~/.ssh/id_rsa.pub
+            ssh-keygen -lf ~/.ssh/id_rsa.pub
 
   # Build a manylinux wheel.
   package-manylinux:
@@ -294,6 +305,12 @@ jobs:
 
 workflows:
   version: 2
+
+  status:
+    jobs:
+      - "connectivity":
+          {}
+
   all-tests:
     jobs:
       - "check"
