@@ -1,7 +1,7 @@
 # A basic packaging of this very project: Python bindings to the Rust
 # Ristretto implementation.
-{ libchallenge_bypass_ristretto_ffi, python, pythonPackages, milksnake, cffi, attrs, testtools, hypothesis }:
-pythonPackages.buildPythonPackage rec {
+{ libchallenge_bypass_ristretto_ffi, python, buildPythonPackage, milksnake, cffi, attrs, testtools, hypothesis }:
+buildPythonPackage rec {
   version = "2024.11.5";
   pname = "python-challenge-bypass-ristretto";
   name = "${pname}-${version}";
