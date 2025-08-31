@@ -16,7 +16,7 @@ QxE220HfZvvOJSNdDx3hgYNfQntxeT+mkRr55LNMNyYdXdFOfkrHRoQz+MXlqfyoiWPWc7dG3k4sa5ZW
 
 # How to install
 
-Binary wheels for Linux (manylinux2010), macOS, and Windows are distributed on PyPI.
+Binary wheels for Linux (manylinux2014), macOS, and Windows are distributed on PyPI.
 
 ```
 pip install python-challenge-bypass-ristretto
