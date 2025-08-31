@@ -78,7 +78,6 @@
               src = libchallenge_bypass_ristretto_ffi-src;
             };
 
-          python39-challenge-bypass-ristretto = py-module pkgs.python39.pkgs;
           python310-challenge-bypass-ristretto = py-module pkgs.python310.pkgs;
           python311-challenge-bypass-ristretto = py-module pkgs.python311.pkgs;
           python312-challenge-bypass-ristretto = py-module pkgs.python312.pkgs;
@@ -111,7 +110,6 @@
           in {
             # Run a little integration test that exercises the underlying
             # library via the Python interface.
-            integration39 = integration pkgs.python39;
             integration310 = integration pkgs.python310;
             integration311 = integration pkgs.python311;
             integration312 = integration pkgs.python312;
