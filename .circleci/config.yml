@@ -308,6 +308,7 @@ workflows:
                 - "python310"
                 - "python311"
                 - "python312"
+                - "python313"
 
       - "package-manylinux":
           name: "package-manylinux-2014_x86_64"
