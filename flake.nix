@@ -1,7 +1,7 @@
 {
   inputs = {
     nixpkgs = {
-      url = "github:nixos/nixpkgs?ref=nixos-24.05";
+      url = "github:nixos/nixpkgs?ref=nixos-25.05";
     };
 
     # The source repository for the crate we're building.
@@ -23,6 +23,7 @@
     naersk = {
       url = "github:nix-community/naersk";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.fenix.follows = "fenix";
     };
   };
   outputs =
@@ -78,10 +79,10 @@
               src = libchallenge_bypass_ristretto_ffi-src;
             };
 
-          python39-challenge-bypass-ristretto = py-module pkgs.python39.pkgs;
           python310-challenge-bypass-ristretto = py-module pkgs.python310.pkgs;
           python311-challenge-bypass-ristretto = py-module pkgs.python311.pkgs;
           python312-challenge-bypass-ristretto = py-module pkgs.python312.pkgs;
+          python313-challenge-bypass-ristretto = py-module pkgs.python313.pkgs;
         };
 
         # Define our cross-compiled packages.  This currently does not include
@@ -110,10 +111,10 @@
           in {
             # Run a little integration test that exercises the underlying
             # library via the Python interface.
-            integration39 = integration pkgs.python39;
             integration310 = integration pkgs.python310;
             integration311 = integration pkgs.python311;
             integration312 = integration pkgs.python312;
+            integration313 = integration pkgs.python313;
 
             # The library should have the correct soname.
             soname = pkgs.runCommand "${lib.name}-soname" { } ''

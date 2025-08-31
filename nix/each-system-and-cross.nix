@@ -88,7 +88,7 @@ let
       checks.${system} = lib.optionalAttrs (buildResult ? checks) buildResult.checks;
     };
 
-  args = lib.cartesianProductOfSets {
+  args = lib.cartesianProduct {
     system = buildSystems;
     crossSystem = crossSystems;
   };
