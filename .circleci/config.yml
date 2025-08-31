@@ -315,8 +315,8 @@ workflows:
           # The image this executor uses comes with no ssh client.  CircleCI
           # rewrites our git configuration to fetch sources over ssh.  Then it
           # fails if we don't have any ssh client.
-          pre-command: "yum install -y openssh-clients; echo 'FLOFLO'; ls /opt/python"
-          python: "/opt/python/cp37-cp37m/bin/python"
+          pre-command: "yum install -y openssh-clients"
+          python: "/opt/python/cp313-cp313/bin/python"
           # This one can upload the sdist.
           upload-sdist: true
           filters: &FILTERS
@@ -336,7 +336,7 @@ workflows:
           name: "package-manylinux_2_28-x86_64"
           executor: "manylinux_2_28-x86_64"
           pre-command: "yum install -y openssh-clients"
-          python: "/opt/python/cp37-cp37m/bin/python"
+          python: "/opt/python/cp313-cp313/bin/python"
           # The other one can upload the sdist.
           upload-sdist: false
           filters:
