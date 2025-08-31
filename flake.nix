@@ -82,6 +82,7 @@
           python310-challenge-bypass-ristretto = py-module pkgs.python310.pkgs;
           python311-challenge-bypass-ristretto = py-module pkgs.python311.pkgs;
           python312-challenge-bypass-ristretto = py-module pkgs.python312.pkgs;
+          python313-challenge-bypass-ristretto = py-module pkgs.python313.pkgs;
         };
 
         # Define our cross-compiled packages.  This currently does not include
@@ -114,6 +115,7 @@
             integration310 = integration pkgs.python310;
             integration311 = integration pkgs.python311;
             integration312 = integration pkgs.python312;
+            integration313 = integration pkgs.python313;
 
             # The library should have the correct soname.
             soname = pkgs.runCommand "${lib.name}-soname" { } ''
